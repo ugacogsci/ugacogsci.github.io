@@ -42,13 +42,15 @@ body::after {
   mix-blend-mode: screen;
 }
 body::before {
-  background: radial-gradient(35% 30% at 20% 35%, color-mix(in oklab, var(--accent-yellow) 70%, transparent) 0 60%, transparent 61%),
-              radial-gradient(30% 35% at 70% 75%, color-mix(in oklab, var(--accent-blue) 65%, transparent) 0 60%, transparent 61%);
+  /* Top pair: yellow (left-top) and blue (right-top) */
+  background: radial-gradient(36% 32% at 20% 18%, color-mix(in oklab, var(--accent-yellow) 70%, transparent) 0 60%, transparent 61%),
+              radial-gradient(34% 30% at 80% 18%, color-mix(in oklab, var(--accent-blue) 65%, transparent) 0 60%, transparent 61%);
   animation: blobs-move-a 36s ease-in-out infinite alternate;
 }
 body::after {
-  background: radial-gradient(40% 35% at 80% 25%, color-mix(in oklab, var(--accent-yellow) 55%, transparent) 0 60%, transparent 61%),
-              radial-gradient(32% 32% at 30% 70%, color-mix(in oklab, var(--accent-blue) 55%, transparent) 0 60%, transparent 61%);
+  /* Bottom pair: blue (left-bottom) and yellow (right-bottom) */
+  background: radial-gradient(34% 32% at 20% 82%, color-mix(in oklab, var(--accent-blue) 60%, transparent) 0 60%, transparent 61%),
+              radial-gradient(36% 34% at 80% 82%, color-mix(in oklab, var(--accent-yellow) 60%, transparent) 0 60%, transparent 61%);
   animation: blobs-move-b 44s ease-in-out infinite alternate;
 }
 
