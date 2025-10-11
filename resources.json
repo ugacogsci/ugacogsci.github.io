@@ -1,0 +1,16 @@
+{
+  "resources": [
+    {
+      "title": "Hands-on with Searle's Chinese Room",
+      "topic": "CogSci Foundations",
+      "date": "2025-10-01",
+      "link": "https://drive.google.com/file/d/1zIm0Z1StVvxITquoZLk2_DEr_nfMQ8MY/view?usp=sharing"
+    },
+    {
+      "title": "The Bitter Lesson",
+      "topic": "Philosophy of AI",
+      "date": "2025-09-23",
+      "link": "https://www.cs.utexas.edu/~eunsol/courses/data/bitter_lesson.pdf"
+    }
+  ]
+}

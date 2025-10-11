@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendar • UGA Cognitive Science Club</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header">
+    <div class="navbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <div class="logo" aria-hidden="true"><img src="assets/img/cogsciclub.png" alt="UGA Cognitive Science Club Logo" /></div>
+          <span>UGA Cognitive Science Club</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a data-nav href="index.html">Home</a>
+          <a data-nav href="resources.html">Resources</a>
+          <a data-nav href="officers.html">Officers</a>
+          <a data-nav href="calendar.html">Calendar</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <main class="container hero">
+    <h1>Calendar</h1>
+    <!-- Add events in events.json -->
+    <div id="events" class="list"></div>
+  </main>
+  <footer>
+    <div class="container">
+      <div>© <span id="year"></span> UGA Cognitive Science Club. All rights reserved.</div>
+      <div class="small">Hosted on GitHub Pages.</div>
+      <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  <script src="assets/js/main.js"></script>
+  <script>
+    fetch('events.json', {cache:'no-store'}).then(r=>r.json()).then(data => {
+      const mount = document.getElementById('events');
+      const upcoming = data.events
+        .map(e => ({...e, t: new Date(e.datetime)}))
+        .sort((a,b)=>a.t-b.t);
+      upcoming.forEach(e => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.innerHTML = `
+          <strong>${e.title}</strong>
+          <span class="small">${new Date(e.datetime).toLocaleString()} • ${e.location || 'TBD'}</span>
+          ${e.desc ? `<div class="small">${e.desc}</div>`: ''}
+        `;
+        mount.appendChild(item);
+      });
+    }).catch(()=>{
+      document.getElementById('events').innerHTML = '<p class="small">No events yet.</p>';
+    });
+  </script>
+</body>
+</html>

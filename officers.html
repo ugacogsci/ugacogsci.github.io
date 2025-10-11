@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Officers • UGA Cognitive Science Club</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header">
+    <div class="navbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <div class="logo" aria-hidden="true"><img src="assets/img/cogsciclub.png" alt="UGA Cognitive Science Club Logo" /></div>
+          <span>UGA Cognitive Science Club</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a data-nav href="index.html">Home</a>
+          <a data-nav href="resources.html">Resources</a>
+          <a data-nav href="officers.html">Officers</a>
+          <a data-nav href="calendar.html">Calendar</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <main class="container hero">
+    <h1>Officers</h1>
+    <div id="officers" class="officers"></div>
+  </main>
+  <footer>
+    <div class="container">
+      <div>© <span id="year"></span> UGA Cognitive Science Club. All rights reserved.</div>
+      <div class="small">Hosted on GitHub Pages.</div>
+      <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  <script src="assets/js/main.js"></script>
+  <script>
+    fetch('officers.json', {cache:'no-store'}).then(r=>r.json()).then(data => {
+      const grid = document.getElementById('officers');
+      data.officers.forEach(o => {
+        const card = document.createElement('div');
+        card.className = 'officer-card';
+        const img = o.photo || 'assets/img/placeholder.png';
+        // Build action buttons: Website first (if provided), then any custom links
+        const linkButtons = [];
+        if (o.website) {
+          linkButtons.push(`<a class="btn" href="${o.website}" target="_blank" rel="noopener">Website</a>`);
+        }
+        if (Array.isArray(o.links) && o.links.length) {
+          linkButtons.push(...o.links.map(l => `<a class="btn" href="${l.url}" target="_blank" rel="noopener">${l.label}</a>`));
+        }
+
+        card.innerHTML = `
+          <img alt="${o.name}" src="${img}">
+          <div class="meta">
+            <h3>${o.name}</h3>
+            ${o.role ? `<div class=\"small\">${o.role}</div>` : ''}
+            ${o.email ? `<div class=\"small\"><a href=\"mailto:${o.email}\">${o.email}</a></div>` : ''}
+            ${linkButtons.length ? `<div class=\"actions\">${linkButtons.join(' ')}</div>` : ''}
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }).catch(()=>{
+      document.getElementById('officers').innerHTML = '<p class="small">Officers will be posted soon.</p>';
+    });
+  </script>
+</body>
+</html>

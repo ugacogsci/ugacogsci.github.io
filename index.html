@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UGA Cognitive Science Club</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <meta name="description" content="UGA Cognitive Science Club. Meetings, resources, officers, and events.">
+</head>
+<body>
+  <div id="site-header">
+    <div class="navbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <div class="logo" aria-hidden="true"><img src="assets/img/cogsciclub.png" alt="UGA Cognitive Science Club Logo" /></div>
+          <span>UGA Cognitive Science Club</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a data-nav href="index.html">Home</a>
+          <a data-nav href="resources.html">Resources</a>
+          <a data-nav href="officers.html">Officers</a>
+          <a data-nav href="calendar.html">Calendar</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <main class="container hero">
+    <div class="grid">
+      <section class="card" style="grid-column: span 12;">
+        <h1>UGA Cognitive Science Club</h1>
+        <p class="small">Interdisciplinary study of mind, brain, and intelligent systems at the University of Georgia.</p>
+      </section>
+      <section class="card" style="grid-column: span 8;">
+        <h3>Next Meeting</h3>
+        <div id="next-meeting" class="kv">
+          <div><strong>Topic:</strong> <span data-field="topic">TBD</span></div>
+          <div><strong>Date:</strong> <span data-field="date">TBD</span></div>
+          <div><strong>Location:</strong> <span data-field="location">TBD</span></div>
+          <div><strong>Lead:</strong> <span data-field="lead">TBD</span></div>
+        </div>
+        <p class="small">Check the <a href="calendar.html">calendar</a> for all events.</p>
+      </section>
+      <section class="card" style="grid-column: span 4;">
+        <h3>Get Involved</h3>
+        <ul class="list" style="list-style: none; padding-left: 0;">
+          <li class="item"><span class="badge">Join <a href="https://discord.gg/7cdA3Fwa" target="_blank" rel="noopener">Discord</a></span></li>
+          <li class="item"><span class="badge">Follow <a href="https://www.instagram.com/cogsciclub/" target="_blank" rel="noopener">Instagram</a></span></li>
+          <li class="item"><span class="badge">Join <a href="https://groupme.com/join_group/104065235/bK4KWPVn" target="_blank" rel="noopener">GroupMe</a></span></li>
+          <li class="item"><span class="badge">Email <a href="mailto:cameron.halaby@uga.edu">cameron.halaby@uga.edu</a></span></li>
+        </ul>
+      </section>
+      <section class="card" style="grid-column: span 12;">
+        <h3>Recent Resources</h3>
+        <div id="recent-resources" class="list"></div>
+        <p class="small">Browse all <a href="resources.html">resources</a>.</p>
+      </section>
+    </div>
+  </main>
+  <footer>
+    <div class="container">
+      <div>© <span id="year"></span> UGA Cognitive Science Club. All rights reserved.</div>
+      <div class="small">Hosted on GitHub Pages.</div>
+      <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  </div>
+  <script src="assets/js/main.js"></script>
+  <script>
+    // Populate next meeting from events.json
+    fetch('events.json', {cache:'no-store'}).then(r=>r.json()).then(data => {
+      const upcoming = data.events
+        .map(e => ({...e, t: new Date(e.datetime)}))
+        .filter(e => e.t >= new Date())
+        .sort((a,b)=>a.t-b.t)[0];
+      if (!upcoming) return;
+      document.querySelector('[data-field="topic"]').textContent = upcoming.title;
+      document.querySelector('[data-field="date"]').textContent = new Date(upcoming.datetime).toLocaleString();
+      document.querySelector('[data-field="location"]').textContent = upcoming.location || "TBD";
+      document.querySelector('[data-field="lead"]').textContent = upcoming.lead || "TBD";
+    }).catch(()=>{});
+
+    // Recent resources
+    fetch('resources.json', {cache:'no-store'}).then(r=>r.json()).then(data => {
+      const list = document.getElementById('recent-resources');
+      const recent = data.resources.slice(0,5);
+      recent.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.innerHTML = `<strong>${item.title}</strong>
+                         <span class="small">${item.topic} • ${item.date}</span>
+                         <a class="btn" href="${item.link}" target="_blank" rel="noopener">Open</a>`;
+        list.appendChild(div);
+      });
+    }).catch(()=>{});
+  </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resources • UGA Cognitive Science Club</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div id="site-header">
+    <div class="navbar">
+      <div class="nav-inner">
+        <a class="brand" href="index.html">
+          <div class="logo" aria-hidden="true"><img src="assets/img/cogsciclub.png" alt="UGA Cognitive Science Club Logo" /></div>
+          <span>UGA Cognitive Science Club</span>
+        </a>
+        <nav class="nav" aria-label="Primary">
+          <a data-nav href="index.html">Home</a>
+          <a data-nav href="resources.html">Resources</a>
+          <a data-nav href="officers.html">Officers</a>
+          <a data-nav href="calendar.html">Calendar</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+  <main class="container hero">
+    <h1>Resources</h1>
+    <p class="small">Slides, papers, links, and notes from past meetings.</p>
+    <div id="resource-table"></div>
+  </main>
+  <footer>
+    <div class="container">
+      <div>© <span id="year"></span> UGA Cognitive Science Club. All rights reserved.</div>
+      <div class="small">Hosted on GitHub Pages.</div>
+      <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+      </script>
+    </div>
+  </footer>
+  <script>
+    fetch('resources.json', {cache:'no-store'}).then(r=>r.json()).then(data => {
+      const mount = document.getElementById('resource-table');
+      const table = document.createElement('table');
+      table.innerHTML = `
+        <thead><tr><th>Title</th><th>Topic</th><th>Date</th><th>Link</th></tr></thead>
+        <tbody></tbody>`;
+      const tbody = table.querySelector('tbody');
+      data.resources.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${item.title}</td><td>${item.topic}</td><td>${item.date}</td><td><a class="btn" href="${item.link}" target="_blank" rel="noopener">Open</a></td>`;
+        tbody.appendChild(tr);
+      });
+      mount.appendChild(table);
+    }).catch(()=>{
+      document.getElementById('resource-table').innerHTML = '<p class="small">No resources yet.</p>';
+    });
+  </script>
+</body>
+</html>

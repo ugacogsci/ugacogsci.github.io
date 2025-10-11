@@ -1,0 +1,11 @@
+{
+  "events": [
+    {
+      "title": "Reading Group: Learning Transferable Visual Models From Natural Language Supervision",
+      "datetime": "2025-10-14T17:00:00",
+      "location": "Discord",
+      "lead": "Chaz Merritt",
+      "desc": "This week we are looking at the paper that proposed contrastive language-image pretraining, or CLIP, for neural networks."
+    }
+  ]
+}

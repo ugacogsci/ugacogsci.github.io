@@ -1,0 +1,41 @@
+{
+  "officers": [
+    {
+      "name": "Cameron Halaby",
+      "email": "cameron.halaby@uga.edu",
+      "photo": "assets/img/cameron.png",
+      "links": [
+        {
+          "label": "LinkedIn",
+          "url": "https://www.linkedin.com/"
+        }
+      ]
+    },
+    {
+      "name": "Chaz Merritt",
+      "email": "charles.merritt@uga.edu",
+      "photo": "assets/img/chaz.jpg",
+      "links": [
+        {
+          "label": "chazmerritt.com",
+          "url": "https://www.chazmerritt.com/"
+        },
+        {
+          "label": "LinkedIn",
+          "url": "https://www.linkedin.com/in/chaz-merritt/"
+        }
+      ]
+    },
+    {
+      "name": "Nikhil Kapalavai",
+      "email": "nikhil.kapalavai@uga.edu",
+      "photo": "assets/img/nikhil.jpg",
+      "links": [
+        {
+          "label": "LinkedIn",
+          "url": "https://www.linkedin.com/"
+        }
+      ]
+    }
+  ]
+}
