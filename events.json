@@ -2,14 +2,14 @@
   "events": [
     {
       "title": "Vibecoding",
-      "datetime": "2025-10-14T17:30:00",
+      "datetime": "2025-10-15T17:30:00",
       "location": "Boyd 552",
       "lead": "Cameron",
       "desc": "We'll be looking at vibecoding best practices and different programs created with vibe coders in mind. We'll spend most of the meeting attempting a vibecoding workshop / competition. Results should be available on this website by Friday, Oct 17."
     },
     {
       "title": "Reading Group: Learning Transferable Visual Models From Natural Language Supervision",
-      "datetime": "2025-10-15T17:00:00",
+      "datetime": "2025-10-14T17:00:00",
       "location": "Discord",
       "lead": "Chaz Merritt",
       "desc": "This week we are looking at the paper that proposed contrastive language-image pretraining, or CLIP, for neural networks."
