@@ -4,268 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aim Trainer Game</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #3b0764, #1e3a8a, #312e81);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
 
-    h1, h2, h3, p { margin: 0.5em 0; text-align: center; }
+  <!-- TailwindCSS (optional if you already include it elsewhere) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    button {
-      background: linear-gradient(to right, #22c55e, #059669);
-      color: white;
-      border: none;
-      padding: 16px 32px;
-      font-size: 1.5em;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
+  <!-- React & ReactDOM via CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-    button:hover { transform: scale(1.05); }
+  <!-- Babel to compile JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    .hidden { display: none; }
-
-    #hud {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 80%;
-      max-width: 800px;
-      background: rgba(31, 41, 55, 0.7);
-      border-radius: 10px;
-      padding: 10px 20px;
-      margin-bottom: 10px;
-      font-size: 1.2em;
-    }
-
-    #gameArea {
-      position: relative;
-      width: 80%;
-      max-width: 800px;
-      height: 500px;
-      background: rgba(17, 24, 39, 0.7);
-      border: 4px solid #374151;
-      border-radius: 12px;
-      overflow: hidden;
-      cursor: crosshair;
-    }
-
-    .target {
-      position: absolute;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 0 10px rgba(255,255,255,0.3);
-      transition: transform 0.05s linear;
-    }
-
-    .life {
-      color: red;
-      font-weight: bold;
-      margin-left: 5px;
-    }
-
-    #statsBox {
-      background: rgba(55, 65, 81, 0.7);
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 400px;
-      text-align: center;
-      margin-top: 20px;
-    }
-  </style>
+  <!-- Lucide icons -->
+  <script type="module">
+    import { createIcons, icons } from "https://unpkg.com/lucide@latest/dist/esm/lucide.js";
+    window.lucideIcons = { createIcons, icons };
+  </script>
 </head>
-<body>
-  <div id="menu">
-    <h1>Clicking Game</h1>
-    <p>Test your reaction time and hand-eye coordination!</p>
-    <button id="startBtn">Start Game</button>
-    <div id="instructions" style="max-width:500px; margin-top:20px; background:rgba(31,41,55,0.5); padding:15px; border-radius:10px;">
-      <h3>How to Play</h3>
-      <ul style="text-align:left; line-height:1.6;">
-        <li>Click targets before they shrink away.</li>
-        <li>You have 3 lives — miss 3 and it’s game over.</li>
-        <li>Targets shrink faster and spawn more quickly as you improve.</li>
-      </ul>
-    </div>
-  </div>
 
-  <div id="game" class="hidden">
-    <div id="hud">
-      <div>Score: <span id="score">0</span></div>
-      <div>Lives: <span id="lives">3</span></div>
-      <div>Difficulty: <span id="difficulty">1</span></div>
-      <div>Time: <span id="time">0</span>s</div>
-    </div>
-    <div id="gameArea"></div>
-  </div>
+<body class="bg-gray-900 text-white">
+  <div id="root"></div>
 
-  <div id="gameover" class="hidden">
-    <h1>Game Over!</h1>
-    <div id="statsBox">
-      <p><strong>Final Score:</strong> <span id="finalScore"></span></p>
-      <p><strong>Time Survived:</strong> <span id="finalTime"></span>s</p>
-      <p><strong>Average Reaction:</strong> <span id="avgReaction"></span>ms</p>
-      <p><strong>Accuracy:</strong> <span id="accuracy"></span>%</p>
-      <p><strong>Max Level:</strong> <span id="maxLevel"></span></p>
-    </div>
-    <button id="playAgain">Play Again</button>
-  </div>
+  <!-- Your Aim Trainer JSX file (compiled in browser by Babel) -->
+  <script type="text/babel" data-type="module" src="AimTrainerGame.jsx"></script>
 
-  <script>
-    const menu = document.getElementById('menu');
-    const game = document.getElementById('game');
-    const gameover = document.getElementById('gameover');
-    const gameArea = document.getElementById('gameArea');
+  <!-- Mount the React component -->
+  <script type="text/babel">
+    import AimTrainerGame from './AimTrainerGame.jsx';
 
-    const scoreEl = document.getElementById('score');
-    const livesEl = document.getElementById('lives');
-    const difficultyEl = document.getElementById('difficulty');
-    const timeEl = document.getElementById('time');
-
-    const finalScoreEl = document.getElementById('finalScore');
-    const finalTimeEl = document.getElementById('finalTime');
-    const avgReactionEl = document.getElementById('avgReaction');
-    const accuracyEl = document.getElementById('accuracy');
-    const maxLevelEl = document.getElementById('maxLevel');
-
-    const startBtn = document.getElementById('startBtn');
-    const playAgainBtn = document.getElementById('playAgain');
-
-    let score, lives, difficulty, time, clicks, targets, spawnInterval, timer, animation;
-    let isPlaying = false;
-
-    function startGame() {
-      menu.classList.add('hidden');
-      gameover.classList.add('hidden');
-      game.classList.remove('hidden');
-
-      score = 0;
-      lives = 3;
-      difficulty = 1;
-      time = 0;
-      clicks = [];
-      targets = [];
-      gameArea.innerHTML = '';
-
-      updateHUD();
-
-      isPlaying = true;
-      spawnTarget();
-      startSpawning(1500);
-
-      timer = setInterval(() => {
-        time++;
-        timeEl.textContent = time;
-      }, 1000);
-
-      animateTargets();
-    }
-
-    function startSpawning(interval) {
-      clearInterval(spawnInterval);
-      spawnInterval = setInterval(spawnTarget, interval);
-    }
-
-    function spawnTarget() {
-      const areaRect = gameArea.getBoundingClientRect();
-      const size = Math.max(50, 100 - difficulty * 5);
-      const x = Math.random() * (areaRect.width - size);
-      const y = Math.random() * (areaRect.height - size);
-      const target = document.createElement('div');
-      target.className = 'target';
-      target.style.left = x + 'px';
-      target.style.top = y + 'px';
-      target.style.width = size + 'px';
-      target.style.height = size + 'px';
-      target.dataset.spawnTime = Date.now();
-      target.dataset.size = size;
-      target.dataset.rate = 0.3 + difficulty * 0.05;
-      gameArea.appendChild(target);
-      targets.push(target);
-    }
-
-    function animateTargets() {
-      animation = setInterval(() => {
-        targets.forEach((t, i) => {
-          const current = parseFloat(t.dataset.size);
-          const rate = parseFloat(t.dataset.rate);
-          const newSize = Math.max(0, current - rate);
-          t.dataset.size = newSize;
-          t.style.width = newSize + 'px';
-          t.style.height = newSize + 'px';
-          const hue = Math.max(0, Math.min(120, (newSize / 100) * 120));
-          t.style.backgroundColor = `hsl(${hue}, 80%, 50%)`;
-
-          if (newSize <= 10) {
-            t.remove();
-            targets.splice(i, 1);
-            loseLife();
-          }
-        });
-      }, 16);
-    }
-
-    gameArea.addEventListener('click', e => {
-      if (!isPlaying) return;
-      const target = e.target;
-      if (target.classList.contains('target')) {
-        const reaction = Date.now() - target.dataset.spawnTime;
-        clicks.push(reaction);
-        target.remove();
-        targets = targets.filter(t => t !== target);
-        score++;
-        if (score % 5 === 0) {
-          difficulty++;
-          const newInterval = Math.max(500, 1500 - difficulty * 150);
-          startSpawning(newInterval);
-        }
-        updateHUD();
-      }
-    });
-
-    function loseLife() {
-      lives--;
-      updateHUD();
-      if (lives <= 0) endGame();
-    }
-
-    function updateHUD() {
-      scoreEl.textContent = score;
-      livesEl.textContent = lives;
-      difficultyEl.textContent = difficulty;
-      timeEl.textContent = time;
-    }
-
-    function endGame() {
-      isPlaying = false;
-      clearInterval(spawnInterval);
-      clearInterval(timer);
-      clearInterval(animation);
-      game.classList.add('hidden');
-      gameover.classList.remove('hidden');
-
-      const avg = clicks.length ? Math.round(clicks.reduce((a,b)=>a+b,0)/clicks.length) : 0;
-      const totalTargets = score + (3 - lives);
-      const accuracy = totalTargets ? Math.round((score/totalTargets)*100) : 0;
-
-      finalScoreEl.textContent = score;
-      finalTimeEl.textContent = time;
-      avgReactionEl.textContent = avg;
-      accuracyEl.textContent = accuracy;
-      maxLevelEl.textContent = difficulty;
-    }
-
-    startBtn.onclick = startGame;
-    playAgainBtn.onclick = startGame;
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AimTrainerGame />);
   </script>
 </body>
 </html>
