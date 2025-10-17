@@ -14,11 +14,27 @@
 
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <script type="text/babel" data-presets="react">
     const { useState, useEffect, useRef } = React;
-    const { Target, Heart, TrendingUp, Award, Clock } = lucideReact;
+    const Icon = ({ name, size = 24, className = "" }) => {
+      const icon = lucide.icons[name];
+      if (!icon) return null;
+      return createElement("svg", {
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        className,
+        width: size,
+        height: size,
+        dangerouslySetInnerHTML: { __html: icon }
+      });
+    };
     
     function AimTrainerGame() {
       const [gameState, setGameState] = useState('menu'); // menu, playing, gameover
