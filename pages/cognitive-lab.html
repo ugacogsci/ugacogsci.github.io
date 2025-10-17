@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cognitive Lab | Working Memory Suite</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Cognitive Lab</h1>
+    <p>Explore classic working memory tasks, track performance, and compare results. Select a protocol to get started and the platform will guide you through each trial.</p>
+  </header>
+
+  <main>
+    <section class="module-panel" aria-labelledby="task-selector-heading">
+      <h2 id="task-selector-heading">
+        Protocols
+        <span style="font-size:0.85rem;color:rgba(148,163,184,0.8);font-weight:500;">Select one to configure &amp; launch</span>
+      </h2>
+      <div class="task-list" role="list">
+        <button class="task-card" role="listitem" data-task="chunking">
+          <h3>Chunking: Magic Number 7 ± 2</h3>
+          <p>Contrast baseline recall with delimiter-assisted sequences across 20 rounds.</p>
+        </button>
+        <button class="task-card" role="listitem" data-task="digit-span">
+          <h3>Digit Span</h3>
+          <p>Assess forward and backward recall capacity using randomized digit lists.</p>
+        </button>
+        <button class="task-card" role="listitem" data-task="n-back">
+          <h3>N-Back</h3>
+          <p>Measure continuous updating with configurable N-level streams of stimuli.</p>
+        </button>
+        <button class="task-card" role="listitem" data-task="pattern-recall">
+          <h3>Pattern Recall</h3>
+          <p>Probe visuospatial working memory with rapid pattern presentations.</p>
+        </button>
+        <button class="task-card" role="listitem" data-task="story-chain">
+          <h3>Story Chain</h3>
+          <p>Evaluate narrative retention by extending and repeating story elements.</p>
+        </button>
+      </div>
+
+      <div class="cta-group" aria-live="polite">
+        <button class="primary" id="launch-task" disabled>Launch Session</button>
+        <button class="secondary" id="task-settings" disabled>Configure Options</button>
+      </div>
+
+      <div class="task-stage" id="task-stage">
+        <p>Select a protocol to preview its flow and launch settings. <strong>The stage will render live trials here.</strong></p>
+      </div>
+
+      <section class="task-details" aria-live="polite" id="task-details" hidden>
+        <h4>Protocol Overview</h4>
+        <ul id="task-highlights">
+          <li>Select a protocol to view its steps and requirements.</li>
+        </ul>
+      </section>
+    </section>
+
+  </main>
+
+  <footer>
+    Cognitive Lab is a research sandbox. Data sync and analytics integrations will appear here.
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
