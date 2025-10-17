@@ -5,35 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aim Trainer Game</title>
 
-  <!-- TailwindCSS (optional if you already include it elsewhere) -->
+  <!-- Tailwind (dev-only is fine for GH Pages) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- React & ReactDOM via CDN -->
+  <!-- React and ReactDOM -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-  <!-- Babel to compile JSX -->
+  <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Lucide icons -->
-  <script type="module">
-    import { createIcons, icons } from "https://unpkg.com/lucide@latest/dist/esm/lucide.js";
-    window.lucideIcons = { createIcons, icons };
-  </script>
 </head>
 
 <body class="bg-gray-900 text-white">
   <div id="root"></div>
 
-  <!-- Your Aim Trainer JSX file (compiled in browser by Babel) -->
-  <script type="text/babel" data-type="module" src="AimTrainerGame.jsx"></script>
+  <script type="text/javascript">
+    // Fetch your JSX file, strip imports, and run it
+    fetch('AimTrainerGame.jsx')
+      .then(res => res.text())
+      .then(src => {
+        // Remove ES6 imports (so browser doesn’t crash)
+        const cleaned = src.replace(/^import.*$/gm, '');
 
-  <!-- Mount the React component -->
-  <script type="text/babel">
-    import AimTrainerGame from './AimTrainerGame.jsx';
+        // Transpile JSX -> JS
+        const compiled = Babel.transform(cleaned, { presets: ['react'] }).code;
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<AimTrainerGame />);
+        // Evaluate in this scope
+        eval(compiled);
+
+        // Render the component (now defined globally)
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(AimTrainerGame));
+      })
+      .catch(err => {
+        console.error('Error loading AimTrainerGame.jsx:', err);
+      });
   </script>
 </body>
 </html>
