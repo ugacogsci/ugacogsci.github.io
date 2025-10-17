@@ -105,12 +105,18 @@
       { number: 3, title: "Clicker Game", subtitle: "By Jeff Carreon, using Claude", url: "pages/aim-trainer.html" },
     ];
 
+    function toOrdinal(n) {
+      const s = ["th", "st", "nd", "rd"];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+    
     const resultsList = document.getElementById('results-list');
     results.forEach(item => {
       const div = document.createElement('div');
       div.className = 'item';
       div.innerHTML = `
-        <strong>${item.number}. ${item.title}</strong><br>
+        <strong>${toOrdinal(item.number)} — ${item.title}</strong><br>
         <span class="small">${item.subtitle}</span><br>
         <a class="btn" href="${item.url}" target="_blank" rel="noopener">Open</a>
       `;
