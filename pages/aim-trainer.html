@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aim Trainer Game</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+  <div id="root"></div>
+
+  <script type="text/javascript">
+    window.onload = () => {
+      fetch('AimTrainerGame.jsx')
+        .then(res => res.text())
+        .then(src => {
+          // Remove import/export
+          let cleaned = src
+            .replace(/^import.*$/gm, '')
+            .replace(/^export\s+default\s+/m, '');
+
+          // Transpile JSX → JS
+          const compiled = Babel.transform(cleaned, { presets: ['react'] }).code;
+
+          // Define hooks
+          const { useState, useEffect, useRef, useMemo, useCallback } = React;
+          Object.assign(window, { useState, useEffect, useRef, useMemo, useCallback });
+
+          // Define placeholder icons
+          window.Target = () => React.createElement('span', { role: 'img' }, '🎯');
+          window.Heart = () => React.createElement('span', { role: 'img' }, '❤️');
+          window.TrendingUp = () => React.createElement('span', { role: 'img' }, '📈');
+          window.Award = () => React.createElement('span', { role: 'img' }, '🏆');
+          window.Clock = () => React.createElement('span', { role: 'img' }, '⏱️');
+
+          // Evaluate the component
+          eval(compiled);
+
+          // Mount
+          const root = ReactDOM.createRoot(document.getElementById('root'));
+          root.render(React.createElement(AimTrainerGame));
+        })
+        .catch(err => console.error('Error loading AimTrainerGame.jsx:', err));
+    };
+  </script>
+</body>
+</html>

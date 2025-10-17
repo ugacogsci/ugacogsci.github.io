@@ -33,10 +33,10 @@
       <section class="card" style="grid-column: span 8;">
         <h3>Next Meeting</h3>
         <div id="next-meeting" class="kv">
-          <div><strong>Topic:</strong> <span data-field="topic">TBD</span></div>
-          <div><strong>Date:</strong> <span data-field="date">TBD</span></div>
-          <div><strong>Location:</strong> <span data-field="location">TBD</span></div>
-          <div><strong>Lead:</strong> <span data-field="lead">TBD</span></div>
+          <div><strong>Topic:</strong> <span data-field="topic">Vibecoding</span></div>
+          <div><strong>Date:</strong> <span data-field="date">Wednesday, Oct 15</span></div>
+          <div><strong>Location:</strong> <span data-field="location">Boyd 552</span></div>
+          <div><strong>Lead:</strong> <span data-field="lead">Cameron</span></div>
         </div>
         <p class="small">Check the <a href="calendar.html">calendar</a> for all events.</p>
       </section>
@@ -55,7 +55,7 @@
         <p class="small">Browse all <a href="resources.html">resources</a>.</p>
       </section>
       <section class="card" style="grid-column: span 12;">
-        <h3>Results</h3>
+        <h3>Vibe Coding Competition Results</h3>
         <div id="results-list" class="list"></div>
       </section>
     </div>
@@ -100,17 +100,25 @@
 
     // Results list
     const results = [
-      { number: 1, title: "Title1", subtitle: "By person1", url: "pages/page1.html" },
-      { number: 2, title: "Title2", subtitle: "By person2", url: "pages/page2.html" },
-      { number: 3, title: "Title3", subtitle: "By person3", url: "pages/page3.html" }
+      { number: 1, title: "Cognitive Lab", subtitle: "By Charles Merritt, using Codex, Windsurf", url: "pages/cognitive-lab.html" },
+      { number: 2, title: "Stroop Speed Clicker", subtitle: "By Dominic Luckino, using Codex", url: "pages/stroop_speed_clicker.html" },
+      { number: 3, title: "Clicker Game", subtitle: "By Jeff Carreon, using Claude", url: "pages/aim-trainer.html" },
+      { number: 4, title: "Stroop Showdown", subtitle: "By Joseph Yoon, using Opal", url: "https://opal.google/?flow=drive:/1UZ26v5Mps_3LyjZtJHOlMFyF8Fe7EaVk&shared&mode=app"},
+      { number: 4, title: "Wellbeing Chat", subtitle: "By Nikhil Kapalavai, using Opal", url: "https://opal.google/?flow=drive:/1NStn6OCeNvTKj8mQ3yGYTMhQUeNdkoYU&shared&mode=app"}
     ];
 
+    function toOrdinal(n) {
+      const s = ["th", "st", "nd", "rd"];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+    
     const resultsList = document.getElementById('results-list');
     results.forEach(item => {
       const div = document.createElement('div');
       div.className = 'item';
       div.innerHTML = `
-        <strong>${item.number}. ${item.title}</strong><br>
+        <strong>${toOrdinal(item.number)} — ${item.title}</strong><br>
         <span class="small">${item.subtitle}</span><br>
         <a class="btn" href="${item.url}" target="_blank" rel="noopener">Open</a>
       `;
