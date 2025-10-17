@@ -23,15 +23,23 @@
     fetch('AimTrainerGame.jsx')
       .then(res => res.text())
       .then(src => {
-        // Remove all import/export lines
+        // Remove import/export lines
         let cleaned = src
           .replace(/^import.*$/gm, '')
-          .replace(/^export\s+default\s+/m, ''); 
+          .replace(/^export\s+default\s+/m, '');
 
         // Transpile JSX to JS
         const compiled = Babel.transform(cleaned, { presets: ['react'] }).code;
 
-        // Evaluate in this scope (defines AimTrainerGame)
+        // ✅ Inject React hooks into global scope
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+        window.useState = useState;
+        window.useEffect = useEffect;
+        window.useRef = useRef;
+        window.useMemo = useMemo;
+        window.useCallback = useCallback;
+
+        // Evaluate the component definition
         eval(compiled);
 
         // Mount it
