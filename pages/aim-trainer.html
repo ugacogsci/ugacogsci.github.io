@@ -18,23 +18,28 @@
 
   <script type="text/babel" data-presets="react">
     const { useState, useEffect, useRef } = React;
-    const Icon = ({ name, size = 24, className = "" }) => {
-      const icon = lucide.icons[name];
-      if (!icon) return null;
-      return createElement("svg", {
-        xmlns: "http://www.w3.org/2000/svg",
-        viewBox: "0 0 24 24",
-        fill: "none",
-        stroke: "currentColor",
-        strokeWidth: "2",
-        strokeLinecap: "round",
-        strokeLinejoin: "round",
+    
+    const { createElement: h } = React;
+    const Icon = ({ name, size = 24, color = "currentColor", className = "" }) => {
+      const svg = lucide.createIcon(name);
+      return h('svg', {
         className,
         width: size,
         height: size,
-        dangerouslySetInnerHTML: { __html: icon }
+        fill: 'none',
+        stroke: color,
+        strokeWidth: 2,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        dangerouslySetInnerHTML: { __html: svg.innerHTML },
       });
     };
+
+    const Target = (props) => <Icon name="target" {...props} />;
+    const Heart = (props) => <Icon name="heart" {...props} />;
+    const TrendingUp = (props) => <Icon name="trending-up" {...props} />;
+    const Award = (props) => <Icon name="award" {...props} />;
+    const Clock = (props) => <Icon name="clock" {...props} />;
     
     function AimTrainerGame() {
       const [gameState, setGameState] = useState('menu'); // menu, playing, gameover
