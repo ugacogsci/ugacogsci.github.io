@@ -54,6 +54,10 @@
         <div id="recent-resources" class="list"></div>
         <p class="small">Browse all <a href="resources.html">resources</a>.</p>
       </section>
+      <section class="card" style="grid-column: span 12;">
+        <h3>Vibe Coding Competition Results</h3>
+        <div id="results-list" class="list"></div>
+      </section>
     </div>
   </main>
   <footer>
@@ -93,6 +97,33 @@
         list.appendChild(div);
       });
     }).catch(()=>{});
+
+    // Results list
+    const results = [
+      { number: 1, title: "Cognitive Lab", subtitle: "By Charles Merritt, using Codex, Windsurf", url: "pages/cognitive-lab.html" },
+      { number: 2, title: "Stroop Speed Clicker", subtitle: "By Dominic Luckino, using Codex", url: "pages/stroop_speed_clicker.html" },
+      { number: 3, title: "Clicker Game", subtitle: "By Jeff Carreon, using Claude", url: "pages/aim-trainer.html" },
+      { number: 4, title: "Stroop Showdown", subtitle: "By Joseph Yoon, using Opal", url: "https://opal.google/?flow=drive:/1UZ26v5Mps_3LyjZtJHOlMFyF8Fe7EaVk&shared&mode=app"},
+      { number: 4, title: "Wellbeing Chat", subtitle: "By Nikhil Kapalavai, using Opal", url: "https://opal.google/?flow=drive:/1NStn6OCeNvTKj8mQ3yGYTMhQUeNdkoYU&shared&mode=app"}
+    ];
+
+    function toOrdinal(n) {
+      const s = ["th", "st", "nd", "rd"];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+    
+    const resultsList = document.getElementById('results-list');
+    results.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <strong>${toOrdinal(item.number)} — ${item.title}</strong><br>
+        <span class="small">${item.subtitle}</span><br>
+        <a class="btn" href="${item.url}" target="_blank" rel="noopener">Open</a>
+      `;
+      resultsList.appendChild(div);
+    });
   </script>
 </body>
 </html>

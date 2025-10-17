@@ -1,0 +1,428 @@
+:root {
+  color-scheme: light dark;
+  --bg: #0f172a;
+  --surface: #1f2937;
+  --surface-alt: #111827;
+  --text: #f9fafb;
+  --accent: #38bdf8;
+  --accent-muted: rgba(56, 189, 248, 0.15);
+  --border: rgba(148, 163, 184, 0.2);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 55%), var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+header {
+  padding: 3.5rem 1.5rem 2rem;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: clamp(2.25rem, 5vw, 3rem);
+  letter-spacing: -0.02em;
+}
+
+header p {
+  margin: 0.75rem auto 0;
+  max-width: 60ch;
+  font-size: 1.05rem;
+  color: rgba(249, 250, 251, 0.76);
+}
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+.module-panel {
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.1), rgba(15, 23, 42, 0.8));
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  padding: 2rem;
+}
+
+.module-panel h2 {
+  font-size: 1.5rem;
+  margin: 0 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.task-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.task-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.task-card:focus,
+.task-card:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.task-card.active {
+  border-color: var(--accent);
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.task-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.task-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(249, 250, 251, 0.7);
+  line-height: 1.4;
+}
+
+.cta-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.cta-group button {
+  appearance: none;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta-group button.primary {
+  background: var(--accent);
+  color: #0f172a;
+  box-shadow: 0 8px 22px rgba(56, 189, 248, 0.35);
+}
+
+.cta-group button.secondary {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.cta-group button:disabled {
+  opacity: 0.4;
+  cursor: wait;
+  transform: none;
+  box-shadow: none;
+}
+
+.cta-group button:focus-visible {
+  outline: 3px solid rgba(56, 189, 248, 0.4);
+  outline-offset: 3px;
+}
+
+.cta-group button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.task-stage {
+  margin-top: 2rem;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 16px;
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  padding: 1.5rem;
+  min-height: 240px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: rgba(249, 250, 251, 0.75);
+}
+
+.task-stage strong {
+  color: var(--text);
+}
+
+.chunking-session {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+.chunking-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+  color: rgba(148, 163, 184, 0.9);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chunking-display {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.18em;
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  padding: 1.4rem;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.55);
+  min-height: 96px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.chunking-response {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.chunking-response label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.chunking-response input {
+  background: rgba(17, 24, 39, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  color: var(--text);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+
+.chunking-response input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.chunking-response button {
+  justify-self: start;
+  background: var(--accent);
+  color: #0f172a;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chunking-response button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.3);
+}
+
+.chunking-response button:focus-visible {
+  outline: 3px solid rgba(56, 189, 248, 0.4);
+  outline-offset: 3px;
+}
+
+.chunking-feedback {
+  font-size: 0.95rem;
+  color: rgba(226, 232, 240, 0.85);
+}
+
+.chunking-summary {
+  background: rgba(17, 24, 39, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.chunking-scoreboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.chunking-scoreboard div {
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 10px;
+  padding: 0.75rem;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  display: grid;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.chunking-scoreboard span {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.chunking-scoreboard strong {
+  font-size: 1.15rem;
+  color: var(--text);
+}
+
+.chunking-history h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(226, 232, 240, 0.88);
+}
+
+.chunking-history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.chunking-history li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: rgba(148, 163, 184, 0.85);
+  gap: 1rem;
+}
+
+.chunking-history li span {
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.85);
+}
+
+body[data-chunking-locked="true"] .chunking-display {
+  background: rgba(56, 189, 248, 0.18);
+  color: var(--accent);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+body.chunking-fullscreen {
+  overflow: hidden;
+  background: var(--bg);
+}
+
+body.chunking-fullscreen header,
+body.chunking-fullscreen .task-list,
+body.chunking-fullscreen .cta-group,
+body.chunking-fullscreen .task-details,
+body.chunking-fullscreen footer {
+  display: none;
+}
+
+body.chunking-fullscreen main {
+  max-width: none;
+  padding: 0;
+}
+
+body.chunking-fullscreen .module-panel {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  min-height: 100vh;
+  padding: clamp(2.5rem, 6vh, 3.5rem) clamp(1.25rem, 4vw, 3rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+body.chunking-fullscreen #task-selector-heading {
+  display: none;
+}
+
+body.chunking-fullscreen .task-stage {
+  flex: 1;
+  margin-top: 0;
+  border: none;
+  padding: clamp(2rem, 5vw, 3rem);
+  background: rgba(15, 23, 42, 0.82);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.55);
+}
+
+body.chunking-fullscreen .chunking-session {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.task-details {
+  margin-top: 1.5rem;
+  background: rgba(15, 23, 42, 0.56);
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.task-details h4 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.8);
+}
+
+.task-details ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.55rem;
+  font-size: 0.95rem;
+  color: rgba(226, 232, 240, 0.85);
+}
+
+
+footer {
+  text-align: center;
+  padding: 2.5rem 1.5rem 3rem;
+  color: rgba(148, 163, 184, 0.85);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 720px) {
+  header {
+    padding: 2.75rem 1.25rem 1.5rem;
+  }
+
+  .module-panel {
+    padding: 1.5rem;
+  }
+}

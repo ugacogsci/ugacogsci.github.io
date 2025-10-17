@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<!--
+  Stroop Speed Clicker
+  Copyright (c) Oct 16, 2025 Dominic Luckino
+  Licensed under the MIT License. See LICENSE/LICENSE.txt for details.
+  Most recent version: 1.1.0 (Oct 16, 2025)
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stroop Speed Clicker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #f5f7fa 0%, #e4ecf7 100%);
+      color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 640px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 18px 45px rgba(44, 62, 80, 0.18);
+      padding: 32px;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 2rem;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    p {
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      font-weight: bold;
+    }
+
+    .status-item {
+      background: #f0f4ff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .prompt {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 120px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 2px dashed #d5deef;
+      margin-bottom: 24px;
+      font-size: 2.75rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      transition: transform 0.1s ease-out;
+    }
+
+    .prompt.flash {
+      transform: scale(1.05);
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .color-button {
+      border: none;
+      border-radius: 12px;
+      padding: 16px 0;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #ffffff;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, opacity 0.2s ease;
+      opacity: 0.9;
+    }
+
+    .color-button.neutral {
+      background: #ffffff;
+      border: 2px solid #dbe2f0;
+      color: #1f2937;
+    }
+
+    .color-button.neutral:disabled {
+      border-color: #e0e7f5;
+    }
+
+    .color-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+
+    .color-button:active {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .controls button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 999px;
+      border: none;
+      background: #0d6efd;
+      color: #ffffff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(13, 110, 253, 0.3);
+      transition: background 0.1s ease, transform 0.1s ease;
+    }
+
+    .controls button:disabled {
+      background: #9fb7f0;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .controls button:active {
+      transform: scale(0.98);
+    }
+
+    .feedback {
+      min-height: 24px;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 0.03em;
+    }
+
+    .stats {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 12px;
+      background: #f5f9ff;
+      border: 1px solid #d9e4f5;
+    }
+
+    .stats h2 {
+      margin: 0 0 12px;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .stats ul {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.5;
+    }
+
+    details.info-panel {
+      margin-top: 20px;
+      background: #ffffff;
+      border: 1px solid #d9e4f5;
+      border-radius: 12px;
+      padding: 0 20px 16px;
+      box-shadow: 0 12px 22px rgba(28, 43, 60, 0.08);
+    }
+
+    details.info-panel summary {
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0 -20px;
+      padding: 16px 20px;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: 0.03em;
+    }
+
+    details.info-panel summary::after {
+      content: '▸';
+      transition: transform 0.2s ease;
+      font-size: 1.1rem;
+    }
+
+    details.info-panel[open] summary::after {
+      transform: rotate(90deg);
+    }
+
+    details.info-panel[open] summary {
+      border-bottom: 1px solid #dbe2f0;
+    }
+
+    details.info-panel summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .info-panel h3 {
+      margin: 16px 0 8px;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .info-panel p,
+    .info-panel ul {
+      margin: 0 0 12px;
+      line-height: 1.55;
+    }
+
+    .info-panel ul {
+      padding-left: 20px;
+    }
+
+    .settings {
+      margin-top: 24px;
+      padding: 18px 20px;
+      background: #ffffff;
+      border: 1px solid #d9e4f5;
+      border-radius: 12px;
+      box-shadow: 0 12px 24px rgba(28, 43, 60, 0.06);
+    }
+
+    .settings h2 {
+      margin: 0 0 12px;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .settings .toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+    }
+
+    .settings .toggle input {
+      width: 18px;
+      height: 18px;
+    }
+
+    .settings-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .settings-buttons button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      background: #1c7ed6;
+      color: #ffffff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(28, 126, 214, 0.25);
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .settings-buttons button:disabled {
+      background: #94acd8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .settings-buttons button:active {
+      transform: scale(0.97);
+    }
+
+    .settings-status {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #4a6074;
+    }
+
+    .settings-config {
+      margin-top: 12px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .setting-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .setting-field input[type="range"] {
+      width: 100%;
+    }
+
+    .color-choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .color-choice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border: 1px solid #dbe2f0;
+      border-radius: 10px;
+      background: #f8fbff;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .color-choice input {
+      width: 16px;
+      height: 16px;
+    }
+
+    .color-choice .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .apply-config {
+      align-self: start;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 999px;
+      background: #20c997;
+      color: #ffffff;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(32, 201, 151, 0.25);
+      transition: background 0.12s ease, transform 0.1s ease;
+    }
+
+    .apply-config:active {
+      transform: scale(0.98);
+    }
+
+    .apply-config:disabled {
+      background: #9fdac4;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .charts {
+      margin-top: 24px;
+      padding: 18px 20px;
+      background: #ffffff;
+      border: 1px solid #d9e4f5;
+      border-radius: 12px;
+      box-shadow: 0 10px 24px rgba(28, 43, 60, 0.06);
+    }
+
+    .charts h2 {
+      margin: 0 0 14px;
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .chart-block {
+      margin-bottom: 16px;
+    }
+
+    .chart-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .chart-block h3 {
+      margin: 0 0 8px;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .chart-block .chart-empty {
+      color: #4a6074;
+      font-size: 0.9rem;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 140px;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%);
+      border: 1px solid #dbe2f0;
+    }
+
+    .chart-caption {
+      margin-top: 6px;
+      font-size: 0.85rem;
+      color: #4a6074;
+    }
+
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .chart-bar:last-child {
+      margin-bottom: 0;
+    }
+
+    .chart-bar-label {
+      width: 100px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .chart-bar-track {
+      flex: 1;
+      height: 14px;
+      background: #e1e8f5;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .chart-bar-fill {
+      height: 100%;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #74c0fc 0%, #4dabf7 100%);
+    }
+
+    .chart-bar-value {
+      width: 70px;
+      font-size: 0.85rem;
+      text-align: right;
+      color: #1f2933;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 24px 20px;
+      }
+
+      .prompt {
+        font-size: 2.2rem;
+      }
+
+      .color-button {
+        padding: 14px 0;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Stroop Speed Clicker</h1>
+    <p>
+      When the round starts, focus on the <strong>ink color</strong> of the word, not what it says.
+      Tap the matching color button as fast as you can before time runs out. This interference
+      between reading and color naming is the Stroop effect in action. You will rotate through
+      three conditions—color-only buttons, text-labeled buttons, and text-only targets—to see how
+      each presentation changes your performance. After each mode, use the on-screen button to
+      begin the next condition when you are ready.
+    </p>
+
+    <div class="status-bar">
+      <div class="status-item" id="timer">Time: 30s</div>
+      <div class="status-item" id="score">Score: 0</div>
+      <div class="status-item" id="accuracy">Accuracy: 0%</div>
+      <div class="status-item" id="mode">Next: Color-only</div>
+    </div>
+
+    <div class="prompt" id="prompt">READY?</div>
+
+    <div class="buttons" id="buttons"></div>
+
+    <div class="controls">
+      <button id="startButton">Start Round</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="stats" id="stats">
+      <h2>Round Summary</h2>
+      <p>Press start to capture your first set of responses.</p>
+    </div>
+
+    <div class="stats" id="history">
+      <h2>Session Insights</h2>
+      <p>Complete all three modes to finish a round, then review comparisons here.</p>
+    </div>
+
+    <details class="info-panel" id="knowledge">
+      <summary>Cognitive Science Primer</summary>
+      <div>
+        <h3>Stroop Effect (Cognitive Psychology)</h3>
+        <p>
+          The Stroop effect exposes a duel between automatic and controlled processing. Reading is automatic and
+          effortless, while naming ink colors is slower and attention hungry. When the word “RED” appears in blue ink,
+          the automatic channel fires first, forcing the controlled channel to inhibit the irrelevant meaning. The delay
+          and mis-clicks you see in incongruent trials visualize the limits of selective attention and inhibitory control.
+        </p>
+
+        <h3>Parallel Pathways (Cognitive Science)</h3>
+        <p>
+          Connectionist and parallel distributed processing (PDP) models explain this clash as competitive activation.
+          Word-reading and color-naming pathways run simultaneously, but the well-practiced reading route holds stronger
+          weights. Incongruent stimuli ignite both pathways; your system must resolve the conflict before issuing a response.
+          Extra milliseconds reflect the time it takes for the network to dampen one activation pattern and amplify the other.
+        </p>
+
+        <h3>Neural Players (Neuroscience)</h3>
+        <p>
+          Neuroimaging pinpoints distinct roles: the <strong>anterior cingulate cortex (ACC)</strong> detects conflict,
+          the <strong>dorsolateral prefrontal cortex (DLPFC)</strong> pushes top-down control, parietal areas allocate
+          attention to color, and the <strong>visual word form area</strong> automatically decodes text. Larger Stroop costs
+          imply heavier ACC alerts and stronger DLPFC engagement; smoother runs suggest efficient coordination or even
+          training-induced neural efficiency.
+        </p>
+
+        <h3>Parallel Processing &amp; Cognitive Load</h3>
+        <p>
+          Humans process multiple features at once—color, shape, meaning. That parallelism is powerful but capacity-limited.
+          When redundant cues (like text labels) or semantic-only targets push the channels into competition, cognitive load
+          rises. In cognitive load theory terms, incongruent trials raise intrinsic load, labels add extraneous load, and your
+          strategies supply germane load to stay accurate.
+        </p>
+
+        <h3>Why Three Modes?</h3>
+        <ul>
+          <li><strong>Color-only</strong>: establishes a baseline for pure color naming with minimal linguistic intrusion.</li>
+          <li><strong>Text+Color</strong>: adds redundant labels to probe parallel-processing limits and dual-coding pressure.</li>
+          <li><strong>Text Targets</strong>: removes color cues so you must track semantics only, spotlighting cognitive control over meaning.</li>
+        </ul>
+
+        <h3>Reading Your Data</h3>
+        <ul>
+          <li><strong>Large Stroop cost</strong>: ACC is likely flagging frequent conflicts, demanding sustained DLPFC control.</li>
+          <li><strong>Minimal cost with high accuracy</strong>: hints at efficient ACC–DLPFC coupling, rapid conflict detection, or practiced strategies.</li>
+          <li><strong>Reaction slowdowns with labels</strong>: suggests parallel processing strain and heavier cognitive load in language + color circuits.</li>
+          <li><strong>Stable speed in Text Targets</strong>: implies flexible switching to semantic control, possibly tapping well-tuned verbal networks.</li>
+        </ul>
+
+        <h3>Atypical Patterns</h3>
+        <p>
+          If you outperform the classic interference pattern, it does not mean the effect vanished—it points to exceptional
+          control. Cognitive psychology attributes this to stronger inhibition or strategic pacing; PDP models point to better
+          conflict monitoring weights; neuroscience observes tighter ACC–DLPFC coupling, reduced default-mode intrusion, or
+          neural efficiency from training (bilingualism, mindfulness, gaming, music).
+        </p>
+      </div>
+    </details>
+
+    <div class="settings" id="settingsPanel">
+      <h2>Session Controls</h2>
+      <label class="toggle" for="persistToggle">
+        <input type="checkbox" id="persistToggle">
+        <span>Keep results after closing this tab</span>
+      </label>
+      <div class="settings-config">
+        <div class="setting-field">
+          <label for="durationInput">Round length: <span id="durationLabel">30s</span></label>
+          <input type="range" id="durationInput" min="10" max="90" step="5" value="30">
+        </div>
+        <div class="setting-field">
+          <label for="conflictInput">Conflict rate: <span id="conflictLabel">70%</span></label>
+          <input type="range" id="conflictInput" min="0" max="100" step="5" value="70">
+        </div>
+        <div class="setting-field">
+          <span>Active colors:</span>
+          <div class="color-choices" id="colorChoices"></div>
+        </div>
+        <button id="applyConfigButton" class="apply-config">Apply Session Configuration</button>
+      </div>
+      <div class="settings-buttons">
+        <button id="exportButton" disabled>Export Data (CSV)</button>
+        <button id="resetButton">Reset All Data</button>
+      </div>
+      <p class="settings-status" id="storageStatus">Persistence off — data clears on refresh.</p>
+    </div>
+
+    <div class="charts" id="chartsPanel">
+      <h2>Visual Snapshots</h2>
+      <div class="chart-block" id="reactionChartBlock">
+        <h3>Latest Round Reaction Speeds</h3>
+        <div class="chart-content" id="reactionChart"></div>
+      </div>
+      <div class="chart-block" id="stroopChartBlock">
+        <h3>Stroop Cost Across Rounds</h3>
+        <div class="chart-content" id="stroopChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Palette of available colors for prompts and buttons
+    const COLORS = [
+      { name: 'Red', value: '#eb4d4b' },
+      { name: 'Blue', value: '#3498db' },
+      { name: 'Green', value: '#2ecc71' },
+      { name: 'Yellow', value: '#f1c40f', textColor: '#2d3436' },
+      { name: 'Purple', value: '#9b59b6' },
+      { name: 'Orange', value: '#e67e22' },
+      { name: 'Black', value: '#2f3640' },
+      { name: 'Pink', value: '#ff6bcb', textColor: '#2d3436' }
+    ];
+
+    // Definitions for each experimental mode
+    const MODES = [
+      {
+        id: 'color-only',
+        name: 'Color-only',
+        showLabels: false,
+        intro: 'Pure color buttons—no text labels competing for attention.'
+      },
+      {
+        id: 'labeled',
+        name: 'Text+Color',
+        showLabels: true,
+        intro: 'Color buttons now include text labels; notice if words tug on your focus.'
+      },
+      {
+        id: 'text-only',
+        name: 'Text Targets',
+        showLabels: true,
+        useNeutralButtons: true,
+        intro: 'Buttons show color words only—no fill color hints. Follow the word that matches the ink color.'
+      }
+    ];
+
+    // Storage keys for persistence slots
+    const STORAGE_KEYS = {
+      settings: 'stroop_settings',
+      roundHistory: 'stroop_round_history',
+      macroHistory: 'stroop_macro_history'
+    };
+    
+    // Default configuration profile for sessions
+    const defaultConfig = {
+      roundDuration: 30,
+      mismatchProbability: 0.7,
+      activeColors: COLORS.map(c => c.name)
+    };
+
+    // Mode colors used in mini charts
+    const MODE_COLORS = {
+      'color-only': '#51cf66',
+      'labeled': '#845ef7',
+      'text-only': '#ff922b'
+    };
+
+    // Cached DOM references for quick access
+    const timerEl = document.getElementById('timer');
+    const scoreEl = document.getElementById('score');
+    const accuracyEl = document.getElementById('accuracy');
+    const modeEl = document.getElementById('mode');
+    const promptEl = document.getElementById('prompt');
+    const buttonsContainer = document.getElementById('buttons');
+    const feedbackEl = document.getElementById('feedback');
+    const statsEl = document.getElementById('stats');
+    const historyEl = document.getElementById('history');
+    const startButton = document.getElementById('startButton');
+    const persistToggle = document.getElementById('persistToggle');
+    const exportButton = document.getElementById('exportButton');
+    const resetButton = document.getElementById('resetButton');
+    const storageStatus = document.getElementById('storageStatus');
+    const durationInput = document.getElementById('durationInput');
+    const conflictInput = document.getElementById('conflictInput');
+    const durationLabel = document.getElementById('durationLabel');
+    const conflictLabel = document.getElementById('conflictLabel');
+    const colorChoicesContainer = document.getElementById('colorChoices');
+    const applyConfigButton = document.getElementById('applyConfigButton');
+    const reactionChartEl = document.getElementById('reactionChart');
+    const stroopChartEl = document.getElementById('stroopChart');
+
+    // Internal state values for the active session
+    let activeInkColor = null;
+    let currentWordName = '';
+    let roundTimer = null;
+    let isRunning = false;
+    let lastPromptTime = 0;
+    let totalTrials = 0;
+    let correctTrials = 0;
+    let incorrectTrials = 0;
+    let mismatchTrials = 0;
+    let mismatchCorrect = 0;
+    let congruentTrials = 0;
+    let congruentCorrect = 0;
+    let reactionLog = [];
+    let fastestReaction = null;
+    let currentTimeLeft = 30;
+    let isCurrentMismatch = false;
+    const roundHistory = [];
+    const macroHistory = [];
+    let currentModeIndex = 0;
+    let currentMode = null;
+    let lastCompletedMode = null;
+    let macroRoundActive = false;
+    let macroRoundNumber = 0;
+    let macroModeSummaries = [];
+    let awaitingModeStart = false;
+    let persistEnabled = false;
+    let sessionConfig = { ...defaultConfig };
+    const colorChoiceInputs = [];
+
+    // Build the color button grid once
+    function initButtons() {
+      COLORS.forEach(color => {
+        const button = document.createElement('button');
+        button.className = 'color-button';
+        button.style.background = color.value;
+        button.style.color = color.textColor || '#ffffff';
+        button.dataset.colorName = color.name;
+        button.setAttribute('aria-label', color.name);
+        button.textContent = color.name;
+        button.addEventListener('click', () => handleResponse(color.name));
+        buttonsContainer.appendChild(button);
+      });
+    }
+
+    // Toggle label text on color buttons depending on mode
+    function applyButtonLabels(showLabels) {
+      const buttons = buttonsContainer.querySelectorAll('button');
+      buttons.forEach(button => {
+        const name = button.dataset.colorName || '';
+        if (showLabels) {
+          button.textContent = name;
+        } else {
+          button.textContent = '';
+        }
+      });
+    }
+
+    // Update button aesthetics to match the mode experience
+    function applyButtonStylesForMode(mode) {
+      const buttons = buttonsContainer.querySelectorAll('button');
+      buttons.forEach(button => {
+        const name = button.dataset.colorName || '';
+        const colorConfig = COLORS.find(c => c.name === name);
+        if (!colorConfig) {
+          return;
+        }
+        button.classList.toggle('neutral', Boolean(mode?.useNeutralButtons));
+        if (mode?.useNeutralButtons) {
+          button.style.background = '';
+          button.style.borderColor = '';
+          button.style.color = '#1f2937';
+        } else {
+          button.style.background = colorConfig.value;
+          button.style.borderColor = 'transparent';
+          button.style.color = colorConfig.textColor || '#ffffff';
+        }
+      });
+    }
+
+    // Return the filtered color list for prompt generation
+    function getActiveColorConfigs() {
+      const desired = sessionConfig.activeColors;
+      const filtered = COLORS.filter(color => desired.includes(color.name));
+      return filtered.length >= 2 ? filtered : COLORS;
+    }
+
+    // Hide inactive color buttons when custom palette is in use
+    function updateButtonAvailability() {
+      const activeSet = new Set(sessionConfig.activeColors);
+      const buttons = buttonsContainer.querySelectorAll('button');
+      buttons.forEach(button => {
+        const name = button.dataset.colorName || '';
+        button.style.display = activeSet.has(name) ? '' : 'none';
+      });
+    }
+
+    // Reflect configuration in the control panel inputs
+    function updateConfigInputs() {
+      if (durationInput) {
+        durationInput.value = sessionConfig.roundDuration;
+      }
+      if (conflictInput) {
+        conflictInput.value = Math.round(sessionConfig.mismatchProbability * 100);
+      }
+      if (durationLabel) {
+        durationLabel.textContent = `${sessionConfig.roundDuration}s`;
+      }
+      if (conflictLabel) {
+        conflictLabel.textContent = `${Math.round(sessionConfig.mismatchProbability * 100)}%`;
+      }
+      if (colorChoicesContainer) {
+        colorChoiceInputs.length = 0;
+        colorChoicesContainer.innerHTML = '';
+        COLORS.forEach(color => {
+          const label = document.createElement('label');
+          label.className = 'color-choice';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.value = color.name;
+          checkbox.checked = sessionConfig.activeColors.includes(color.name);
+
+          const swatch = document.createElement('span');
+          swatch.className = 'swatch';
+          swatch.style.background = color.value;
+
+          const nameSpan = document.createElement('span');
+          nameSpan.textContent = color.name;
+
+          label.appendChild(checkbox);
+          label.appendChild(swatch);
+          label.appendChild(nameSpan);
+          colorChoicesContainer.appendChild(label);
+          colorChoiceInputs.push(checkbox);
+        });
+      }
+    }
+
+    // Apply a configuration object (from defaults or storage)
+    function applyConfigFromObject(configObj) {
+      if (!configObj) {
+        return;
+      }
+      const duration = Math.min(Math.max(parseInt(configObj.roundDuration, 10) || defaultConfig.roundDuration, 10), 120);
+      let mismatch = parseFloat(configObj.mismatchProbability);
+      if (Number.isNaN(mismatch)) {
+        mismatch = defaultConfig.mismatchProbability;
+      }
+      mismatch = Math.min(Math.max(mismatch, 0), 1);
+      const activeColors = Array.isArray(configObj.activeColors) && configObj.activeColors.length >= 2
+        ? configObj.activeColors.filter(name => COLORS.some(color => color.name === name))
+        : defaultConfig.activeColors;
+
+      sessionConfig = {
+        roundDuration: duration,
+        mismatchProbability: mismatch,
+        activeColors: activeColors
+      };
+      updateConfigInputs();
+      updateButtonAvailability();
+    }
+
+    // Collect color selections from the checkbox list
+    function collectSelectedColors() {
+      const selected = colorChoiceInputs
+        .filter(input => input.checked)
+        .map(input => input.value);
+      return selected;
+    }
+
+    // Live-update duration label as slider moves
+    function handleDurationInput() {
+      if (!durationLabel || !durationInput) {
+        return;
+      }
+      durationLabel.textContent = `${durationInput.value}s`;
+    }
+
+    // Live-update conflict label as slider moves
+    function handleConflictInput() {
+      if (!conflictLabel || !conflictInput) {
+        return;
+      }
+      conflictLabel.textContent = `${conflictInput.value}%`;
+    }
+
+    // Persist session configuration chosen by the user
+    function applySessionConfigFromInputs() {
+      if (!durationInput || !conflictInput) {
+        return;
+      }
+      const selectedColors = collectSelectedColors();
+      if (selectedColors.length < 2) {
+        alert('Select at least two colors to keep the task meaningful.');
+        return;
+      }
+      const duration = parseInt(durationInput.value, 10);
+      const conflictPercent = parseInt(conflictInput.value, 10);
+      sessionConfig = {
+        roundDuration: Math.min(Math.max(duration, 10), 120),
+        mismatchProbability: Math.min(Math.max(conflictPercent / 100, 0), 1),
+        activeColors: selectedColors
+      };
+      updateButtonAvailability();
+      handleDurationInput();
+      handleConflictInput();
+      if (!isRunning && !macroRoundActive) {
+        currentTimeLeft = sessionConfig.roundDuration;
+        timerEl.textContent = `Time: ${sessionConfig.roundDuration}s`;
+      }
+      saveSettings();
+      persistStateIfEnabled();
+      feedbackEl.textContent = `Configuration updated: ${sessionConfig.roundDuration}s rounds with ${Math.round(sessionConfig.mismatchProbability * 100)}% conflicts.`;
+    }
+
+    // Utility to swap array contents while keeping reference
+    function replaceArrayContents(target, data) {
+      target.length = 0;
+      data.forEach(item => target.push(item));
+    }
+
+    // Persist settings configuration to storage
+    function saveSettings() {
+      try {
+        localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify({
+          persist: persistEnabled,
+          config: sessionConfig
+        }));
+      } catch (error) {
+        console.warn('Unable to save settings', error);
+      }
+    }
+
+    // Persist round histories when persistence is enabled
+    function saveStateToStorage() {
+      if (!persistEnabled) {
+        return;
+      }
+      try {
+        localStorage.setItem(STORAGE_KEYS.roundHistory, JSON.stringify(roundHistory));
+        localStorage.setItem(STORAGE_KEYS.macroHistory, JSON.stringify(macroHistory));
+      } catch (error) {
+        console.warn('Unable to persist data', error);
+      }
+    }
+
+    // Remove all persisted histories
+    function clearPersistedState() {
+      try {
+        localStorage.removeItem(STORAGE_KEYS.roundHistory);
+        localStorage.removeItem(STORAGE_KEYS.macroHistory);
+      } catch (error) {
+        console.warn('Unable to clear stored data', error);
+      }
+    }
+
+    // Conditionally persist and refresh UI indicators
+    function persistStateIfEnabled() {
+      if (persistEnabled) {
+        saveStateToStorage();
+      }
+      updateStorageStatus();
+      updateExportButtonState();
+    }
+
+    // Refresh persistence status copy
+    function updateStorageStatus() {
+      if (!storageStatus) {
+        return;
+      }
+      if (persistEnabled) {
+        if (macroHistory.length === 0) {
+          storageStatus.textContent = 'Persistence on — no saved rounds yet.';
+        } else {
+          storageStatus.textContent = `Persistence on — ${macroHistory.length} round${macroHistory.length === 1 ? '' : 's'} stored locally.`;
+        }
+      } else {
+        storageStatus.textContent = 'Persistence off — data clears on refresh.';
+      }
+    }
+
+    // Toggle export availability based on stored data
+    function updateExportButtonState() {
+      if (!exportButton) {
+        return;
+      }
+      const hasData = macroHistory.length > 0 || roundHistory.length > 0;
+      exportButton.disabled = !hasData;
+    }
+
+    // Restore settings and histories from localStorage
+    function loadPersistedState() {
+      let storedSettings = null;
+      try {
+        const rawSettings = localStorage.getItem(STORAGE_KEYS.settings);
+        storedSettings = rawSettings ? JSON.parse(rawSettings) : null;
+      } catch (error) {
+        console.warn('Unable to read settings', error);
+      }
+      if (storedSettings && typeof storedSettings.persist === 'boolean') {
+        persistEnabled = storedSettings.persist;
+        if (persistToggle) {
+          persistToggle.checked = persistEnabled;
+        }
+      }
+      if (storedSettings && storedSettings.config) {
+        applyConfigFromObject(storedSettings.config);
+      } else {
+        sessionConfig = { ...defaultConfig };
+        updateConfigInputs();
+        updateButtonAvailability();
+      }
+
+      if (persistEnabled) {
+        try {
+          const storedRoundsRaw = localStorage.getItem(STORAGE_KEYS.roundHistory);
+          const storedMacrosRaw = localStorage.getItem(STORAGE_KEYS.macroHistory);
+          const storedRounds = storedRoundsRaw ? JSON.parse(storedRoundsRaw) : [];
+          const storedMacros = storedMacrosRaw ? JSON.parse(storedMacrosRaw) : [];
+          if (Array.isArray(storedRounds)) {
+            replaceArrayContents(roundHistory, storedRounds);
+          }
+          if (Array.isArray(storedMacros)) {
+            replaceArrayContents(macroHistory, storedMacros);
+          }
+          if (macroHistory.length > 0) {
+            const lastRound = macroHistory[macroHistory.length - 1];
+            macroRoundNumber = lastRound?.roundNumber || macroHistory.length;
+          }
+        } catch (error) {
+          console.warn('Unable to restore saved data', error);
+          replaceArrayContents(roundHistory, []);
+          replaceArrayContents(macroHistory, []);
+        }
+      }
+
+      updateStorageStatus();
+      updateExportButtonState();
+      handleDurationInput();
+      handleConflictInput();
+    }
+
+    // Build a CSV string for export
+    function buildCsv() {
+      const lines = [];
+      const quote = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+
+      lines.push('Round-Level Summary');
+      lines.push('Round,Trials,Accuracy (%),Average Reaction (ms),Stroop Cost (%),Correct,Incorrect,Stored Modes');
+      if (macroHistory.length === 0) {
+        lines.push('No completed rounds,,,,,,');
+      } else {
+        macroHistory.forEach(round => {
+          const modeNames = (round.modeDetails || []).map(detail => detail.modeName).join(' / ');
+          lines.push([
+            round.roundNumber,
+            round.trials,
+            round.accuracy,
+            round.averageReaction ?? '',
+            round.interferenceGap ?? '',
+            round.correct,
+            round.incorrect,
+            modeNames
+          ].map(quote).join(','));
+        });
+      }
+
+      lines.push('');
+      lines.push('Mode-Level Entries');
+      lines.push('Round,Mode,Trials,Accuracy (%),Average Reaction (ms),Stroop Cost (%),Correct,Incorrect,Conflict Trials,Conflict Accuracy (%),Match Trials,Match Accuracy (%)');
+
+      if (roundHistory.length === 0) {
+        lines.push('No mode entries,,,,,,,,,,,');
+      } else {
+        roundHistory.forEach(entry => {
+          lines.push([
+            entry.macroRound ?? '',
+            entry.modeName,
+            entry.trials,
+            entry.accuracy,
+            entry.averageReaction ?? '',
+            entry.interferenceGap ?? '',
+            entry.correctCount ?? '',
+            entry.incorrectCount ?? '',
+            entry.mismatchTrials ?? '',
+            entry.mismatchAccuracy ?? '',
+            entry.congruentTrials ?? '',
+            entry.congruentAccuracy ?? ''
+          ].map(quote).join(','));
+        });
+      }
+
+      return lines.join('\r\n');
+    }
+
+    // Trigger data download as CSV
+    function exportDataAsCsv() {
+      const csv = buildCsv();
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `stroop_results_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    // Reset all in-memory and persisted session data
+    function resetAllData() {
+      if (isRunning || macroRoundActive) {
+        alert('Finish the current mode before resetting the session.');
+        return;
+      }
+      replaceArrayContents(roundHistory, []);
+      replaceArrayContents(macroHistory, []);
+      macroRoundNumber = 0;
+      awaitingModeStart = false;
+      currentModeIndex = 0;
+      currentMode = null;
+      lastCompletedMode = null;
+      macroModeSummaries = [];
+      totalTrials = 0;
+      correctTrials = 0;
+      incorrectTrials = 0;
+      mismatchTrials = 0;
+      mismatchCorrect = 0;
+      congruentTrials = 0;
+      congruentCorrect = 0;
+      reactionLog = [];
+      fastestReaction = null;
+      currentTimeLeft = sessionConfig.roundDuration;
+      timerEl.textContent = `Time: ${currentTimeLeft}s`;
+      promptEl.textContent = 'READY?';
+      promptEl.style.color = '';
+      feedbackEl.textContent = 'Data cleared. Start Round 1 to collect new results.';
+      scoreEl.textContent = 'Score: 0';
+      accuracyEl.textContent = 'Accuracy: —';
+      setButtonsDisabled(true);
+      startButton.disabled = false;
+      persistStateIfEnabled();
+      updateStats();
+      updateHistoryInsights();
+      syncModeUI();
+    }
+
+    // Respond to persistence checkbox changes
+    function handlePersistToggle() {
+      persistEnabled = Boolean(persistToggle?.checked);
+      if (persistEnabled) {
+        saveStateToStorage();
+      } else {
+        clearPersistedState();
+      }
+      saveSettings();
+      updateStorageStatus();
+      updateExportButtonState();
+    }
+
+    // Respond to export button presses
+    function handleExportClick() {
+      if (macroHistory.length === 0 && roundHistory.length === 0) {
+        alert('No data to export yet. Complete a round first.');
+        return;
+      }
+      exportDataAsCsv();
+    }
+
+    // Respond to reset button presses with confirmation
+    function handleResetClick() {
+      if (!confirm('Reset all stored Stroop data for this browser?')) {
+        return;
+      }
+      resetAllData();
+      if (persistEnabled) {
+        saveStateToStorage();
+      } else {
+        clearPersistedState();
+      }
+      updateStorageStatus();
+      updateExportButtonState();
+    }
+
+    // Keep mode text and start button state in sync
+    function syncModeUI() {
+      if (macroRoundActive && currentMode) {
+        modeEl.textContent = `Round ${macroRoundNumber}: ${currentMode.name}`;
+        startButton.textContent = `Round ${macroRoundNumber} in progress...`;
+      } else if (macroRoundActive && awaitingModeStart) {
+        const upcoming = MODES[currentModeIndex] || MODES[0];
+        modeEl.textContent = `Round ${macroRoundNumber}: next up ${upcoming.name}`;
+        startButton.textContent = `Begin ${upcoming.name}`;
+      } else if (macroRoundActive) {
+        const upcoming = MODES[currentModeIndex] || MODES[0];
+        modeEl.textContent = `Round ${macroRoundNumber}: preparing ${upcoming.name}`;
+        startButton.textContent = `Round ${macroRoundNumber} in progress...`;
+      } else {
+        const upcomingRound = macroRoundNumber + 1;
+        const upcomingMode = MODES[0];
+        modeEl.textContent = `Next Round: ${upcomingMode.name}`;
+        startButton.textContent = `Start Round ${upcomingRound}`;
+      }
+    }
+
+    // Kick off a new three-mode round
+    function beginMacroRound() {
+      if (macroRoundActive || isRunning) {
+        return;
+      }
+      macroRoundActive = true;
+      macroRoundNumber += 1;
+      currentModeIndex = 0;
+      macroModeSummaries = [];
+      startButton.disabled = true;
+      startModeRound();
+    }
+
+    // Start the next individual mode within the round
+    function startModeRound() {
+      if (isRunning) {
+        return;
+      }
+      awaitingModeStart = false;
+      startButton.disabled = true;
+      clearInterval(roundTimer);
+      isRunning = true;
+      currentMode = MODES[currentModeIndex];
+      applyButtonLabels(currentMode.showLabels);
+      applyButtonStylesForMode(currentMode);
+      syncModeUI();
+      currentTimeLeft = 30;
+      totalTrials = 0;
+      correctTrials = 0;
+      incorrectTrials = 0;
+      mismatchTrials = 0;
+      mismatchCorrect = 0;
+      congruentTrials = 0;
+      congruentCorrect = 0;
+      reactionLog = [];
+      fastestReaction = null;
+      isCurrentMismatch = false;
+      currentWordName = '';
+      updateScoreboard();
+      updateStats(undefined, currentMode);
+      feedbackEl.textContent = `${currentMode.intro} Match the ink color, not the word.`;
+      startButton.disabled = true;
+      setButtonsDisabled(false);
+      timerEl.textContent = 'Time: 30s';
+      promptEl.textContent = 'GO!';
+      scheduleNextPrompt();
+
+      roundTimer = setInterval(() => {
+        currentTimeLeft -= 1;
+        timerEl.textContent = `Time: ${currentTimeLeft}s`;
+        if (currentTimeLeft <= 0) {
+          endRound();
+        }
+      }, 1000);
+    }
+
+    // Conclude the current mode and transition or finish
+    function endRound() {
+      if (!isRunning) {
+        return;
+      }
+      isRunning = false;
+      clearInterval(roundTimer);
+      setButtonsDisabled(true);
+      promptEl.textContent = 'DONE!';
+      const finishedMode = currentMode;
+      const metrics = updateStats(undefined, finishedMode);
+      logRound(metrics, finishedMode);
+      macroModeSummaries.push({ mode: finishedMode, metrics });
+      lastCompletedMode = finishedMode;
+      updateHistoryInsights();
+      const averageText = metrics.averageReaction === null
+        ? 'Reaction-time data needs more trials.'
+        : `Average reaction ${metrics.averageReaction} ms.`;
+      let costWrap;
+      if (metrics.interferenceGap === null) {
+        costWrap = 'Collect both conflict and match trials to reveal the Stroop cost.';
+      } else if (metrics.interferenceGap > 0) {
+        costWrap = `Conflicts cut accuracy by ${metrics.interferenceGap}% compared with matches.`;
+      } else if (metrics.interferenceGap < 0) {
+        costWrap = `Conflicts ran ${Math.abs(metrics.interferenceGap)}% more accurate than matches—an atypical pattern!`;
+      } else {
+        costWrap = 'Conflicts matched your accuracy on the easy trials.';
+      }
+
+      const modeCompleteMessage = `Mode complete! Accuracy ${metrics.trials === 0 ? '—' : `${metrics.accuracy}%`}. ${averageText} ${costWrap}`;
+
+      if (currentModeIndex < MODES.length - 1) {
+        const upcomingMode = MODES[currentModeIndex + 1];
+        feedbackEl.textContent = `${modeCompleteMessage} Next: ${upcomingMode.name}. Click "Begin ${upcomingMode.name}" when you're ready.`;
+        currentModeIndex += 1;
+        currentMode = null;
+        awaitingModeStart = true;
+        startButton.disabled = false;
+        startButton.textContent = `Begin ${upcomingMode.name}`;
+        syncModeUI();
+      } else {
+        feedbackEl.textContent = `${modeCompleteMessage} Round ${macroRoundNumber} complete! Review the insights below and press start to run another round.`;
+        finalizeMacroRound();
+        macroRoundActive = false;
+        currentModeIndex = 0;
+        currentMode = null;
+        applyButtonLabels(MODES[currentModeIndex].showLabels);
+        applyButtonStylesForMode(MODES[currentModeIndex]);
+        awaitingModeStart = false;
+        startButton.disabled = false;
+        syncModeUI();
+      }
+    }
+
+    // Generate the next Stroop stimulus
+    function scheduleNextPrompt() {
+      if (!isRunning) {
+        return;
+      }
+
+      const palette = getActiveColorConfigs();
+      const inkColor = palette[Math.floor(Math.random() * palette.length)];
+      const mismatchRequested = Math.random() < sessionConfig.mismatchProbability;
+      const mismatchOptions = palette.filter(color => color.name !== inkColor.name);
+      const wordOptions = mismatchRequested && mismatchOptions.length > 0 ? mismatchOptions : palette;
+
+      const wordColor = wordOptions[Math.floor(Math.random() * wordOptions.length)];
+
+      activeInkColor = inkColor;
+      currentWordName = wordColor.name;
+      isCurrentMismatch = mismatchRequested;
+      promptEl.textContent = wordColor.name.toUpperCase();
+      promptEl.style.color = inkColor.value;
+      promptEl.classList.remove('flash');
+      void promptEl.offsetWidth;
+      promptEl.classList.add('flash');
+      lastPromptTime = performance.now();
+    }
+
+    // Handle player input and update metrics
+    function handleResponse(selectedColor) {
+      if (!isRunning) {
+        return;
+      }
+      const now = performance.now();
+      const reaction = now - lastPromptTime;
+      reactionLog.push(reaction);
+      fastestReaction = fastestReaction === null ? reaction : Math.min(fastestReaction, reaction);
+
+      const isCorrect = selectedColor === activeInkColor.name;
+
+      if (isCurrentMismatch) {
+        mismatchTrials += 1;
+        if (isCorrect) {
+          mismatchCorrect += 1;
+        }
+      } else {
+        congruentTrials += 1;
+        if (isCorrect) {
+          congruentCorrect += 1;
+        }
+      }
+
+      if (isCorrect) {
+        correctTrials += 1;
+      } else {
+        incorrectTrials += 1;
+      }
+
+      totalTrials += 1;
+
+      const metrics = getRoundMetrics();
+      updateScoreboard(metrics);
+      const message = buildFeedbackMessage({
+        isCorrect,
+        selectedColor,
+        reactionMs: Math.round(reaction),
+        metrics
+      });
+      feedbackEl.textContent = message;
+      updateStats(metrics, currentMode);
+      scheduleNextPrompt();
+    }
+
+    // Refresh scoreboard entries based on current tallies
+    function updateScoreboard(metrics = getRoundMetrics()) {
+      scoreEl.textContent = `Score: ${correctTrials}`;
+      if (metrics.trials === 0) {
+        accuracyEl.textContent = 'Accuracy: —';
+      } else {
+        accuracyEl.textContent = `Accuracy: ${metrics.accuracy}%`;
+      }
+    }
+
+    // Compute derived metrics for the active mode
+    function getRoundMetrics() {
+      const accuracy = totalTrials === 0 ? 0 : Math.round((correctTrials / totalTrials) * 100);
+      const mismatchAccuracy = mismatchTrials === 0
+        ? null
+        : Math.round((mismatchCorrect / mismatchTrials) * 100);
+      const congruentAccuracy = congruentTrials === 0
+        ? null
+        : Math.round((congruentCorrect / congruentTrials) * 100);
+      const averageReaction = reactionLog.length === 0
+        ? null
+        : Math.round(reactionLog.reduce((sum, rt) => sum + rt, 0) / reactionLog.length);
+      const fastest = fastestReaction === null ? null : Math.round(fastestReaction);
+      const interferenceGap = mismatchAccuracy !== null && congruentAccuracy !== null
+        ? congruentAccuracy - mismatchAccuracy
+        : null;
+      return {
+        accuracy,
+        mismatchAccuracy,
+        congruentAccuracy,
+        averageReaction,
+        fastest,
+        interferenceGap,
+        trials: totalTrials,
+        correctCount: correctTrials,
+        incorrectCount: incorrectTrials,
+        mismatchTrials,
+        mismatchCorrect,
+        congruentTrials,
+        congruentCorrect
+      };
+    }
+
+    // Render mode summary statistics into the card
+    function updateStats(metrics = getRoundMetrics(), modeInfo = currentMode || lastCompletedMode) {
+      const summaryItems = [
+        `Mode: ${modeInfo ? modeInfo.name : '—'}`,
+        `Completed trials: ${metrics.trials}`,
+        metrics.trials === 0 ? 'Overall accuracy: —' : `Overall accuracy: ${metrics.accuracy}%`,
+        metrics.mismatchAccuracy === null ? 'Conflict accuracy: —' : `Conflict accuracy: ${metrics.mismatchAccuracy}%`,
+        metrics.congruentAccuracy === null ? 'Match accuracy: —' : `Match accuracy: ${metrics.congruentAccuracy}%`,
+        metrics.averageReaction === null ? 'Average reaction: —' : `Average reaction: ${metrics.averageReaction} ms`,
+        metrics.fastest === null ? 'Fastest click: —' : `Fastest click: ${metrics.fastest} ms`
+      ];
+
+      let interferenceNarrative = 'Complete a blend of matching and conflicting trials to expose the Stroop cost.';
+      if (metrics.interferenceGap !== null) {
+        if (metrics.interferenceGap > 0) {
+          interferenceNarrative = `Conflicting words reduced accuracy by ${metrics.interferenceGap}% compared with matches—classic Stroop interference.`;
+        } else if (metrics.interferenceGap < 0) {
+          interferenceNarrative = `You reversed the typical Stroop pattern: conflicts ran ${Math.abs(metrics.interferenceGap)}% more accurate than matches.`;
+        } else {
+          interferenceNarrative = 'Conflicts and matches landed at identical accuracy this round.';
+        }
+      }
+
+      let speedNarrative = metrics.trials === 0
+        ? 'Finish a few trials to unlock reaction-time analysis.'
+        : metrics.averageReaction === null
+          ? 'We need more reaction-time data to summarize your pacing.'
+          : metrics.averageReaction < 700
+            ? 'Average reaction stayed sharp (<700 ms); you kept interference in check.'
+            : metrics.averageReaction > 1100
+              ? 'Average reaction above 1100 ms shows the conflict is taxing attention.'
+              : 'Reaction time sat in a steady mid-range; nice control under pressure.';
+
+      statsEl.innerHTML = `
+        <h2>Round Summary</h2>
+        <ul>
+          ${summaryItems.map(item => `<li>${item}</li>`).join('')}
+        </ul>
+        <p>${interferenceNarrative}</p>
+        <p>${speedNarrative}</p>
+      `;
+      return metrics;
+    }
+
+    // Restore scoreboard display from the last mode entry
+    function hydrateScoreboardFromHistory() {
+      const lastEntry = roundHistory[roundHistory.length - 1];
+      if (!lastEntry) {
+        scoreEl.textContent = 'Score: 0';
+        accuracyEl.textContent = 'Accuracy: —';
+        return;
+      }
+      const scoreValue = typeof lastEntry.correctCount === 'number' ? lastEntry.correctCount : 0;
+      scoreEl.textContent = `Score: ${scoreValue}`;
+      const accuracyValue = typeof lastEntry.accuracy === 'number' ? `${lastEntry.accuracy}%` : '—';
+      accuracyEl.textContent = `Accuracy: ${accuracyValue}`;
+    }
+
+    // Restore round summary panel from the last mode entry
+    function hydrateRoundSummary() {
+      const lastEntry = roundHistory[roundHistory.length - 1];
+      if (!lastEntry) {
+        updateStats();
+        return;
+      }
+      const modeInfo = MODES.find(mode => mode.id === lastEntry.modeId) || { name: lastEntry.modeName };
+      updateStats({
+        accuracy: lastEntry.accuracy,
+        mismatchAccuracy: lastEntry.mismatchAccuracy,
+        congruentAccuracy: lastEntry.congruentAccuracy,
+        averageReaction: lastEntry.averageReaction,
+        fastest: lastEntry.fastest,
+        interferenceGap: lastEntry.interferenceGap,
+        trials: lastEntry.trials,
+        correctCount: lastEntry.correctCount,
+        incorrectCount: lastEntry.incorrectCount,
+        mismatchTrials: lastEntry.mismatchTrials,
+        mismatchCorrect: lastEntry.mismatchCorrect,
+        congruentTrials: lastEntry.congruentTrials,
+        congruentCorrect: lastEntry.congruentCorrect
+      }, modeInfo);
+    }
+
+    // Produce per-response feedback lines
+    function buildFeedbackMessage({ isCorrect, selectedColor, reactionMs, metrics }) {
+      const speedNote = describeReactionSpeed(reactionMs, isCorrect, isCurrentMismatch);
+      const accuracyNote = metrics.trials === 0 ? '' : ` Overall accuracy now ${metrics.accuracy}%.`;
+
+      if (isCorrect) {
+        if (isCurrentMismatch) {
+          return `Correct in ${reactionMs} ms! You overruled the word "${currentWordName.toUpperCase()}" and matched the ${activeInkColor.name} ink. ${speedNote}${accuracyNote}`.trim();
+        }
+        return `Correct in ${reactionMs} ms. Matching word and ink made this one easier—use it as a breather. ${speedNote}${accuracyNote}`.trim();
+      }
+
+      if (isCurrentMismatch) {
+        return `Missed after ${reactionMs} ms. You clicked ${selectedColor}, but the ink was ${activeInkColor.name} while the word shouted "${currentWordName.toUpperCase()}". ${speedNote}${accuracyNote}`.trim();
+      }
+      return `Missed a matching trial after ${reactionMs} ms—fatigue or speed might be creeping in. ${speedNote}${accuracyNote}`.trim();
+    }
+
+    // Describe reaction speed in human terms
+    function describeReactionSpeed(ms, isCorrect, isMismatch) {
+      if (ms < 500) {
+        return isCorrect ? 'Lightning-fast focus.' : 'Speed may have outrun precision.';
+      }
+      if (ms < 800) {
+        return isCorrect ? 'Smooth pacing.' : 'Quick clicks can misfire—refocus on the ink.';
+      }
+      if (ms < 1100) {
+        return isMismatch ? 'The conflict tugged at attention here.' : 'Pace is steady; keep scanning the ink.';
+      }
+      return isMismatch ? 'The clash really stretched your response.' : 'Consider a quick reset to keep accuracy tight.';
+    }
+
+    // Store per-mode metrics into history
+    function logRound(metrics, modeSnapshot) {
+      if (metrics.trials === 0) {
+        return;
+      }
+      const modeId = modeSnapshot ? modeSnapshot.id : 'unknown';
+      const modeName = modeSnapshot ? modeSnapshot.name : 'Unknown';
+      const showLabels = modeSnapshot ? modeSnapshot.showLabels : null;
+      roundHistory.push({
+        trials: metrics.trials,
+        accuracy: metrics.accuracy,
+        mismatchAccuracy: metrics.mismatchAccuracy,
+        congruentAccuracy: metrics.congruentAccuracy,
+        averageReaction: metrics.averageReaction,
+        fastest: metrics.fastest,
+        interferenceGap: metrics.interferenceGap,
+        correctCount: metrics.correctCount,
+        incorrectCount: metrics.incorrectCount,
+        mismatchTrials: metrics.mismatchTrials,
+        mismatchCorrect: metrics.mismatchCorrect,
+        congruentTrials: metrics.congruentTrials,
+        congruentCorrect: metrics.congruentCorrect,
+        modeId,
+        modeName,
+        showLabels,
+        useNeutralButtons: modeSnapshot ? modeSnapshot.useNeutralButtons : null,
+        macroRound: macroRoundNumber
+      });
+      persistStateIfEnabled();
+    }
+
+    // Summarize a full three-mode round and store it
+    function finalizeMacroRound() {
+      if (macroModeSummaries.length === 0) {
+        return;
+      }
+      const aggregate = macroModeSummaries.reduce((acc, entry) => {
+        const { metrics, mode } = entry;
+        const trials = metrics.trials || 0;
+        const correct = metrics.correctCount || 0;
+        const mismatchTrials = metrics.mismatchTrials || 0;
+        const mismatchCorrect = metrics.mismatchCorrect || 0;
+        const congruentTrials = metrics.congruentTrials || 0;
+        const congruentCorrect = metrics.congruentCorrect || 0;
+        acc.trials += trials;
+        acc.correct += correct;
+        acc.incorrect += metrics.incorrectCount || 0;
+        acc.mismatchTrials += mismatchTrials;
+        acc.mismatchCorrect += mismatchCorrect;
+        acc.congruentTrials += congruentTrials;
+        acc.congruentCorrect += congruentCorrect;
+        if (metrics.averageReaction !== null && metrics.averageReaction !== undefined) {
+          acc.reactionWeightedSum += metrics.averageReaction * trials;
+          acc.reactionTrialSum += trials;
+        }
+        if (metrics.fastest !== null && metrics.fastest !== undefined) {
+          acc.fastest = acc.fastest === null ? metrics.fastest : Math.min(acc.fastest, metrics.fastest);
+        }
+        acc.modeDetails.push({
+          modeId: mode.id,
+          modeName: mode.name,
+          roundNumber: macroRoundNumber,
+          metrics
+        });
+        return acc;
+      }, {
+        trials: 0,
+        correct: 0,
+        incorrect: 0,
+        mismatchTrials: 0,
+        mismatchCorrect: 0,
+        congruentTrials: 0,
+        congruentCorrect: 0,
+        reactionWeightedSum: 0,
+        reactionTrialSum: 0,
+        fastest: null,
+        modeDetails: []
+      });
+
+      const accuracy = aggregate.trials === 0 ? 0 : Math.round((aggregate.correct / aggregate.trials) * 100);
+      const mismatchAccuracy = aggregate.mismatchTrials === 0 ? null : (aggregate.mismatchCorrect / aggregate.mismatchTrials) * 100;
+      const congruentAccuracy = aggregate.congruentTrials === 0 ? null : (aggregate.congruentCorrect / aggregate.congruentTrials) * 100;
+      const interferenceGap = (mismatchAccuracy !== null && congruentAccuracy !== null)
+        ? Math.round(congruentAccuracy - mismatchAccuracy)
+        : null;
+      const averageReaction = aggregate.reactionTrialSum === 0
+        ? null
+        : Math.round(aggregate.reactionWeightedSum / aggregate.reactionTrialSum);
+
+      macroHistory.push({
+        roundNumber: macroRoundNumber,
+        trials: aggregate.trials,
+        correct: aggregate.correct,
+        incorrect: aggregate.incorrect,
+        accuracy,
+        mismatchAccuracy: mismatchAccuracy === null ? null : Math.round(mismatchAccuracy),
+        congruentAccuracy: congruentAccuracy === null ? null : Math.round(congruentAccuracy),
+        interferenceGap,
+        averageReaction,
+        fastest: aggregate.fastest,
+        mismatchTrials: aggregate.mismatchTrials,
+        mismatchCorrect: aggregate.mismatchCorrect,
+        congruentTrials: aggregate.congruentTrials,
+        congruentCorrect: aggregate.congruentCorrect,
+        modeDetails: aggregate.modeDetails
+      });
+
+      macroModeSummaries = [];
+      updateHistoryInsights();
+      persistStateIfEnabled();
+    }
+
+    // Start button handler for rounds and paused modes
+    function handleStartButtonClick() {
+      if (isRunning) {
+        return;
+      }
+      if (macroRoundActive && awaitingModeStart) {
+        startModeRound();
+      } else if (!macroRoundActive) {
+        beginMacroRound();
+      }
+    }
+
+    // Build insight narratives and refresh charts
+    function updateHistoryInsights() {
+      if (roundHistory.length === 0 && macroHistory.length === 0) {
+        historyEl.innerHTML = `
+          <h2>Session Insights</h2>
+          <p>Play at least one full round (all three modes) to unlock analytics.</p>
+        `;
+        renderCharts();
+        return;
+      }
+
+      const macroRoundsCompleted = macroHistory.length;
+      const macroTotals = macroHistory.reduce((acc, round) => {
+        acc.rounds += 1;
+        acc.trials += round.trials || 0;
+        acc.correct += round.correct || 0;
+        acc.incorrect += round.incorrect || 0;
+        acc.mismatchTrials += round.mismatchTrials || 0;
+        acc.mismatchCorrect += round.mismatchCorrect || 0;
+        acc.congruentTrials += round.congruentTrials || 0;
+        acc.congruentCorrect += round.congruentCorrect || 0;
+        if (round.averageReaction !== null && round.averageReaction !== undefined) {
+          acc.reactionWeightedSum += round.averageReaction * (round.trials || 0);
+          acc.reactionTrialSum += (round.trials || 0);
+        }
+        if (round.fastest !== null && round.fastest !== undefined) {
+          acc.fastest = acc.fastest === null ? round.fastest : Math.min(acc.fastest, round.fastest);
+        }
+        return acc;
+      }, {
+        rounds: 0,
+        trials: 0,
+        correct: 0,
+        incorrect: 0,
+        mismatchTrials: 0,
+        mismatchCorrect: 0,
+        congruentTrials: 0,
+        congruentCorrect: 0,
+        reactionWeightedSum: 0,
+        reactionTrialSum: 0,
+        fastest: null
+      });
+
+      const macroAverageAccuracy = macroTotals.trials === 0 ? null : Math.round((macroTotals.correct / macroTotals.trials) * 100);
+      const macroAverageReaction = macroTotals.reactionTrialSum === 0
+        ? null
+        : Math.round(macroTotals.reactionWeightedSum / macroTotals.reactionTrialSum);
+      const macroMismatchAccuracy = macroTotals.mismatchTrials === 0
+        ? null
+        : (macroTotals.mismatchCorrect / macroTotals.mismatchTrials) * 100;
+      const macroCongruentAccuracy = macroTotals.congruentTrials === 0
+        ? null
+        : (macroTotals.congruentCorrect / macroTotals.congruentTrials) * 100;
+      const macroCost = (macroMismatchAccuracy !== null && macroCongruentAccuracy !== null)
+        ? Math.round(macroCongruentAccuracy - macroMismatchAccuracy)
+        : null;
+      const bestMacroRound = macroRoundsCompleted > 0
+        ? macroHistory.reduce((best, round) => (round.accuracy > best.accuracy ? round : best), macroHistory[0])
+        : null;
+      const lastMacroRound = macroRoundsCompleted > 0 ? macroHistory[macroRoundsCompleted - 1] : null;
+      const previousMacroRound = macroRoundsCompleted > 1 ? macroHistory[macroRoundsCompleted - 2] : null;
+
+      const macroSummaryItems = [];
+      macroSummaryItems.push(`Rounds completed: ${macroRoundsCompleted}`);
+      if (macroRoundsCompleted > 0) {
+        macroSummaryItems.push(`Total trials: ${macroTotals.trials}`);
+        macroSummaryItems.push(`Average accuracy: ${macroAverageAccuracy === null ? '—' : `${macroAverageAccuracy}%`}`);
+        macroSummaryItems.push(macroAverageReaction === null
+          ? 'Average reaction: —'
+          : `Average reaction: ${macroAverageReaction} ms`);
+        if (macroCost !== null) {
+          macroSummaryItems.push(`Overall Stroop cost: ${macroCost}%`);
+        }
+        macroSummaryItems.push(`Best round: Round ${bestMacroRound.roundNumber} with ${bestMacroRound.accuracy}% accuracy over ${bestMacroRound.trials} trials`);
+        macroSummaryItems.push(`Last round (Round ${lastMacroRound.roundNumber}) accuracy: ${lastMacroRound.accuracy}%`);
+      } else {
+        macroSummaryItems.push('Complete all three modes to finish Round 1 and unlock round-level comparisons.');
+        if (roundHistory.length > 0) {
+          const modesSeen = Array.from(new Set(roundHistory.map(r => r.modeName))).join(', ');
+          macroSummaryItems.push(`Modes completed so far: ${modesSeen}`);
+        }
+      }
+
+      const modeStats = {};
+      // Ensure a bucket exists for a mode id
+      function ensureBucket(id, name, modeMeta) {
+        if (!modeStats[id]) {
+          modeStats[id] = {
+            id,
+            name: name || 'Unknown mode',
+            rounds: 0,
+            trialSum: 0,
+            correctSum: 0,
+            mismatchTrials: 0,
+            mismatchCorrect: 0,
+            congruentTrials: 0,
+            congruentCorrect: 0,
+            reactionWeightedSum: 0,
+            reactionTrialSum: 0,
+            fastest: null,
+            showLabels: modeMeta ? modeMeta.showLabels : null,
+            useNeutralButtons: modeMeta ? modeMeta.useNeutralButtons : null
+          };
+        }
+        return modeStats[id];
+      }
+
+      MODES.forEach(mode => ensureBucket(mode.id, mode.name, mode));
+
+      roundHistory.forEach(round => {
+        const key = round.modeId || 'unknown';
+        const bucket = ensureBucket(key, round.modeName || 'Unknown mode', {
+          showLabels: round.showLabels,
+          useNeutralButtons: round.useNeutralButtons
+        });
+        const trials = round.trials || 0;
+        const correct = (typeof round.correctCount === 'number')
+          ? round.correctCount
+          : Math.round(((round.accuracy || 0) / 100) * trials);
+        const mismatchTrials = round.mismatchTrials ?? 0;
+        const mismatchCorrect = round.mismatchCorrect ?? (round.mismatchAccuracy !== null && round.mismatchAccuracy !== undefined
+          ? Math.round((round.mismatchAccuracy / 100) * mismatchTrials)
+          : 0);
+        const congruentTrials = round.congruentTrials ?? 0;
+        const congruentCorrect = round.congruentCorrect ?? (round.congruentAccuracy !== null && round.congruentAccuracy !== undefined
+          ? Math.round((round.congruentAccuracy / 100) * congruentTrials)
+          : 0);
+
+        bucket.rounds += 1;
+        bucket.trialSum += trials;
+        bucket.correctSum += correct;
+        bucket.mismatchTrials += mismatchTrials;
+        bucket.mismatchCorrect += mismatchCorrect;
+        bucket.congruentTrials += congruentTrials;
+        bucket.congruentCorrect += congruentCorrect;
+        if (round.averageReaction !== null && round.averageReaction !== undefined) {
+          bucket.reactionWeightedSum += round.averageReaction * trials;
+          bucket.reactionTrialSum += trials;
+        }
+        if (round.fastest !== null && round.fastest !== undefined) {
+          bucket.fastest = bucket.fastest === null ? round.fastest : Math.min(bucket.fastest, round.fastest);
+        }
+      });
+
+      Object.values(modeStats).forEach(bucket => {
+        bucket.avgAccuracy = bucket.trialSum === 0 ? null : Math.round((bucket.correctSum / bucket.trialSum) * 100);
+        bucket.mismatchAccuracy = bucket.mismatchTrials === 0 ? null : Math.round((bucket.mismatchCorrect / bucket.mismatchTrials) * 100);
+        bucket.congruentAccuracy = bucket.congruentTrials === 0 ? null : Math.round((bucket.congruentCorrect / bucket.congruentTrials) * 100);
+        bucket.interferenceGap = (bucket.mismatchAccuracy !== null && bucket.congruentAccuracy !== null)
+          ? bucket.congruentAccuracy - bucket.mismatchAccuracy
+          : null;
+        bucket.avgReaction = bucket.reactionTrialSum === 0 ? null : Math.round(bucket.reactionWeightedSum / bucket.reactionTrialSum);
+      });
+
+      function formatModeSummary(bucket) {
+        // Produce a single line summary entry per mode
+        if (!bucket) {
+          return 'Unknown mode: no data yet.';
+        }
+        if (bucket.rounds === 0) {
+          return `${bucket.name}: no data yet.`;
+        }
+        const roundLabel = bucket.rounds === 1 ? 'round' : 'rounds';
+        const trialsText = bucket.trialSum === 0 ? '0 trials' : `${bucket.trialSum} trials`;
+        const accuracyText = bucket.avgAccuracy === null ? 'accuracy —' : `accuracy ${bucket.avgAccuracy}%`;
+        const reactionText = bucket.avgReaction === null ? 'avg reaction pending' : `avg reaction ${bucket.avgReaction} ms`;
+        let costText;
+        if (bucket.interferenceGap === null) {
+          costText = 'Stroop cost pending';
+        } else if (bucket.interferenceGap > 0) {
+          costText = `Stroop cost ${bucket.interferenceGap}%`;
+        } else if (bucket.interferenceGap < 0) {
+          costText = `Stroop reversal ${Math.abs(bucket.interferenceGap)}%`;
+        } else {
+          costText = 'Stroop cost 0%';
+        }
+        return `${bucket.name}: ${bucket.rounds} ${roundLabel}, ${trialsText}, ${accuracyText}, ${reactionText}, ${costText}.`;
+      }
+
+      function evaluateParallelProcessing(colorBucket, labeledBucket) {
+        // Assess evidence for parallel processing strain between modes
+        if (!colorBucket || colorBucket.rounds === 0) {
+          return 'Play a Color-only round to anchor the parallel-processing comparison.';
+        }
+        if (!labeledBucket || labeledBucket.rounds === 0) {
+          return 'Play a Text+Color round to test parallel-processing load against the baseline.';
+        }
+        const reactionDiff = (labeledBucket.avgReaction !== null && colorBucket.avgReaction !== null)
+          ? labeledBucket.avgReaction - colorBucket.avgReaction
+          : null;
+        const accuracyDiff = (labeledBucket.avgAccuracy !== null && colorBucket.avgAccuracy !== null)
+          ? labeledBucket.avgAccuracy - colorBucket.avgAccuracy
+          : null;
+        const costDiff = (labeledBucket.interferenceGap !== null && colorBucket.interferenceGap !== null)
+          ? labeledBucket.interferenceGap - colorBucket.interferenceGap
+          : null;
+
+        const thresholds = { reaction: 50, accuracy: 3, cost: 4 };
+        const evidence = [];
+        let supportsHypothesis = false;
+
+        if (reactionDiff !== null) {
+          if (reactionDiff > thresholds.reaction) {
+            evidence.push(`reactions slowed ${reactionDiff} ms with labels (automatic reading is pulling attention)`);
+            supportsHypothesis = true;
+          } else if (reactionDiff < -thresholds.reaction) {
+            evidence.push(`reactions sped up ${Math.abs(reactionDiff)} ms with labels—language cues may be stabilizing you`);
+          } else {
+            evidence.push('reaction speed shift minimal');
+          }
+        }
+
+        if (accuracyDiff !== null) {
+          if (accuracyDiff < -thresholds.accuracy) {
+            evidence.push(`accuracy dropped ${Math.abs(accuracyDiff)}% when labels appeared (language channel overpowered color control)`);
+            supportsHypothesis = true;
+          } else if (accuracyDiff > thresholds.accuracy) {
+            evidence.push(`accuracy improved ${accuracyDiff}% with labels`);
+          } else {
+            evidence.push('accuracy stayed roughly level');
+          }
+        }
+
+        if (costDiff !== null) {
+          if (costDiff > thresholds.cost) {
+            evidence.push(`Stroop cost rose ${costDiff}% in the labeled mode (ACC likely flagging more conflicts)`);
+            supportsHypothesis = true;
+          } else if (costDiff < -thresholds.cost) {
+            evidence.push(`Stroop cost eased ${Math.abs(costDiff)}% with labels`);
+          }
+        }
+
+        const totalModeTrials = (colorBucket.trialSum || 0) + (labeledBucket.trialSum || 0);
+        if (totalModeTrials < 20) {
+          evidence.push('sample still small (<20 trials)');
+        }
+
+        if (evidence.length === 0) {
+          evidence.push('insufficient metrics collected yet');
+        }
+
+        const evidenceText = evidence.join('; ');
+        if (supportsHypothesis) {
+          return `Parallel-processing strain detected: ${evidenceText}. Expect higher DLPFC recruitment to suppress the automatic reading route.`;
+        }
+        return `No strong parallel-processing penalty yet: ${evidenceText}. Conflict monitoring circuits appear well-balanced between language and color pathways.`;
+      }
+
+      function evaluateTextTargets(textBucket, colorBucket, labeledBucket) {
+        // Assess the text-only target mode against baselines
+        if (!textBucket || textBucket.rounds === 0) {
+          return 'Run a Text Targets round to probe the text-only decision load.';
+        }
+        const baselines = [colorBucket, labeledBucket].filter(bucket => bucket && bucket.rounds > 0);
+        if (baselines.length === 0) {
+          return 'Play the other modes to create a baseline for the Text Targets condition.';
+        }
+
+        const baselineTotals = baselines.reduce((acc, bucket) => {
+          acc.trials += bucket.trialSum;
+          acc.correct += bucket.correctSum;
+          acc.reactionWeightedSum += bucket.reactionWeightedSum;
+          acc.reactionTrialSum += bucket.reactionTrialSum;
+          acc.mismatchTrials += bucket.mismatchTrials;
+          acc.mismatchCorrect += bucket.mismatchCorrect;
+          acc.congruentTrials += bucket.congruentTrials;
+          acc.congruentCorrect += bucket.congruentCorrect;
+          return acc;
+        }, {
+          trials: 0,
+          correct: 0,
+          reactionWeightedSum: 0,
+          reactionTrialSum: 0,
+          mismatchTrials: 0,
+          mismatchCorrect: 0,
+          congruentTrials: 0,
+          congruentCorrect: 0
+        });
+
+        const baselineAccuracy = baselineTotals.trials === 0 ? null : (baselineTotals.correct / baselineTotals.trials) * 100;
+        const textAccuracy = textBucket.trialSum === 0 ? null : (textBucket.correctSum / textBucket.trialSum) * 100;
+        const accuracyDiff = (textAccuracy !== null && baselineAccuracy !== null)
+          ? Math.round(textAccuracy - baselineAccuracy)
+          : null;
+
+        const baselineReaction = baselineTotals.reactionTrialSum === 0
+          ? null
+          : Math.round(baselineTotals.reactionWeightedSum / baselineTotals.reactionTrialSum);
+        const reactionDiff = (textBucket.avgReaction !== null && baselineReaction !== null)
+          ? textBucket.avgReaction - baselineReaction
+          : null;
+
+        const baselineMismatchAccuracy = baselineTotals.mismatchTrials === 0
+          ? null
+          : (baselineTotals.mismatchCorrect / baselineTotals.mismatchTrials) * 100;
+        const baselineCongruentAccuracy = baselineTotals.congruentTrials === 0
+          ? null
+          : (baselineTotals.congruentCorrect / baselineTotals.congruentTrials) * 100;
+        const baselineCost = (baselineMismatchAccuracy !== null && baselineCongruentAccuracy !== null)
+          ? Math.round(baselineCongruentAccuracy - baselineMismatchAccuracy)
+          : null;
+        const costDiff = (textBucket.interferenceGap !== null && baselineCost !== null)
+          ? textBucket.interferenceGap - baselineCost
+          : null;
+
+        const thresholds = { reaction: 70, accuracy: 4, cost: 5 };
+        const evidence = [];
+        let indicatesLoad = false;
+
+        if (reactionDiff !== null) {
+          if (reactionDiff > thresholds.reaction) {
+            evidence.push(`responses slowed ${reactionDiff} ms in Text Targets (semantic control demanded extra effort)`);
+            indicatesLoad = true;
+          } else if (reactionDiff < -thresholds.reaction) {
+            evidence.push(`responses sped up ${Math.abs(reactionDiff)} ms in Text Targets`);
+          } else {
+            evidence.push('reaction speed close to baseline');
+          }
+        }
+
+        if (accuracyDiff !== null) {
+          if (accuracyDiff < -thresholds.accuracy) {
+            evidence.push(`accuracy fell ${Math.abs(accuracyDiff)}% compared with other modes`);
+            indicatesLoad = true;
+          } else if (accuracyDiff > thresholds.accuracy) {
+            evidence.push(`accuracy improved ${accuracyDiff}% versus other modes (semantic focus may be an advantage)`);
+          } else {
+            evidence.push('accuracy stayed similar to baseline');
+          }
+        }
+
+        if (costDiff !== null) {
+          if (costDiff > thresholds.cost) {
+            evidence.push(`Stroop cost grew ${costDiff}% in Text Targets (meaning-only decisions taxed control)`);
+            indicatesLoad = true;
+          } else if (costDiff < -thresholds.cost) {
+            evidence.push(`Stroop cost eased ${Math.abs(costDiff)}% in Text Targets`);
+          }
+        }
+
+        if (textBucket.trialSum < 15) {
+          evidence.push('Text Targets sample still light (<15 trials)');
+        }
+
+        if (evidence.length === 0) {
+          evidence.push('no comparative metrics yet');
+        }
+
+        const evidenceText = evidence.join('; ');
+        if (indicatesLoad) {
+          return `Text Targets shows elevated cognitive load: ${evidenceText}. Expect heavier reliance on semantic pathways and sustained DLPFC focus to override missing color cues.`;
+        }
+        return `Text Targets performance aligns with baseline: ${evidenceText}. Semantic control pathways appear tuned to absorb the extra demand.`;
+      }
+
+      function buildStroopNarrative(bucketsMap, overallCost, totalTrialCount) {
+        // Summarize Stroop interference patterns across modes
+        const buckets = Object.values(bucketsMap).filter(bucket => bucket.rounds > 0);
+        if (!buckets.length) {
+          return '';
+        }
+        const withCost = buckets.filter(bucket => bucket.interferenceGap !== null);
+        if (!withCost.length) {
+          return 'Collect both congruent and conflict trials in each mode to estimate Stroop interference.';
+        }
+        const positiveCosts = withCost.filter(bucket => bucket.interferenceGap > 0);
+        if (!positiveCosts.length) {
+          const reversals = withCost.filter(bucket => bucket.interferenceGap < 0);
+          if (reversals.length) {
+            const strongestRev = reversals.reduce((a, b) => (Math.abs(b.interferenceGap) > Math.abs(a.interferenceGap) ? b : a));
+            return `No classic Stroop cost yet—${strongestRev.name} even shows a ${Math.abs(strongestRev.interferenceGap)}% reversal. That hints at high-efficiency conflict monitoring (ACC) and rapid top-down suppression (DLPFC).`;
+          }
+          return 'No Stroop interference detected so far; conflict accuracy matches congruent accuracy, suggesting strengthened inhibitory control.';
+        }
+        const strongest = positiveCosts.reduce((a, b) => (b.interferenceGap > a.interferenceGap ? b : a));
+        let text = `Stroop interference strongest in ${strongest.name} (${strongest.interferenceGap}% accuracy drop on conflicts). The ACC is likely firing frequent conflict signals, recruiting DLPFC control to re-focus on ink color.`;
+        const weakest = positiveCosts.reduce((a, b) => (b.interferenceGap < a.interferenceGap ? b : a));
+        if (strongest.id !== weakest.id && weakest.interferenceGap !== strongest.interferenceGap) {
+          text += ` ${weakest.name} kept conflicts tighter (${weakest.interferenceGap}% cost), pointing to better automatic suppression in that presentation.`;
+        }
+        const textTargetsBucket = modeStats['text-only'];
+        if (textTargetsBucket && textTargetsBucket.rounds > 0 && textTargetsBucket.interferenceGap !== null) {
+          const baselineBuckets = [modeStats['color-only'], modeStats['labeled']].filter(bucket => bucket && bucket.rounds > 0 && bucket.interferenceGap !== null);
+          const baselineAvgCost = baselineBuckets.length === 0
+            ? null
+            : Math.round(baselineBuckets.reduce((sum, bucket) => sum + bucket.interferenceGap, 0) / baselineBuckets.length);
+          if (baselineAvgCost !== null) {
+            const delta = textTargetsBucket.interferenceGap - baselineAvgCost;
+            if (delta > 5) {
+              text += ` Text Targets amplified the cost by ${delta}% versus the other modes, indicating semantic demands overloaded control circuits.`;
+            } else if (delta < -5) {
+              text += ` Text Targets softened the cost by ${Math.abs(delta)}% versus the other modes, suggesting verbal strategies counteracted interference.`;
+            }
+          }
+        }
+        if (overallCost !== null && totalTrialCount >= 10) {
+          text += ` Overall across ${totalTrialCount} trials the Stroop cost sits near ${overallCost}%—a snapshot of how strongly automatic reading competes with color naming for you.`;
+        }
+        return text;
+      }
+
+      function buildCognitiveLoadNarrative(lastRound, macroTotals) {
+        // Summarize cognitive load observations for the latest round
+        if (!lastRound) {
+          return 'Complete a full round to gauge cognitive load and executive demand.';
+        }
+        const avgReaction = lastRound.averageReaction;
+        const accuracy = lastRound.accuracy;
+        const trials = lastRound.trials || 0;
+        const interference = lastRound.interferenceGap;
+        const pieces = [];
+        if (avgReaction === null) {
+          pieces.push('Reaction-time data still sparse; finish more trials for load estimates.');
+        } else if (avgReaction > 1200) {
+          pieces.push(`Average reaction ${avgReaction} ms suggests high cognitive load—DLPFC is likely working hard to juggle color, language, and working-memory goals.`);
+        } else if (avgReaction > 950) {
+          pieces.push(`Average reaction ${avgReaction} ms indicates moderate load; control systems are engaged but coping.`);
+        } else {
+          pieces.push(`Average reaction ${avgReaction} ms points to efficient resource use—executive circuits are keeping the workload light.`);
+        }
+        if (accuracy < 80) {
+          pieces.push('Accuracy below 80% shows cognitive load is spilling over into errors; consider pacing strategies to reduce extraneous load.');
+        } else if (accuracy >= 90 && avgReaction !== null && avgReaction <= 950) {
+          pieces.push('High accuracy with brisk reactions implies neural efficiency—possibly strong ACC–DLPFC coupling and low default-mode intrusion.');
+        }
+        if (interference !== null && Math.abs(interference) <= 3) {
+          pieces.push('Minimal Stroop cost inside the round hints at rapid conflict detection and strategic suppression of the reading pathway.');
+        }
+        if (trials < 45) {
+          pieces.push('Collect ~45+ trials per round for a more stable cognitive load estimate.');
+        }
+        return pieces.join(' ');
+      }
+
+      function buildMacroComparisonNarrative(last, previous) {
+        // Compare round-level performance to observe adaptation
+        if (!last) {
+          return '';
+        }
+        if (!previous) {
+          return 'Round 1 complete—run another full round to compare how your control networks adapt.';
+        }
+        const statements = [];
+        const accDelta = last.accuracy - previous.accuracy;
+        if (accDelta === 0) {
+          statements.push(`Accuracy matched the previous round at ${last.accuracy}% (steady executive control).`);
+        } else if (accDelta > 0) {
+          statements.push(`Accuracy improved by ${accDelta}% compared with Round ${previous.roundNumber}—suggesting stronger inhibitory control or strategy tuning.`);
+        } else {
+          statements.push(`Accuracy dipped ${Math.abs(accDelta)}% versus Round ${previous.roundNumber}; cognitive load may have risen or focus waned.`);
+        }
+        if (last.averageReaction !== null && previous.averageReaction !== null) {
+          const reactionDelta = last.averageReaction - previous.averageReaction;
+          if (reactionDelta === 0) {
+            statements.push('Reaction speed held steady across rounds (balanced resource use).');
+          } else if (reactionDelta > 0) {
+            statements.push(`Reactions slowed ${reactionDelta} ms in the latest round, implying heavier DLPFC workload.`);
+          } else {
+            statements.push(`Reactions sped up ${Math.abs(reactionDelta)} ms in the latest round—executive control became more efficient.`);
+          }
+        }
+        if (last.interferenceGap !== null && previous.interferenceGap !== null) {
+          const costDelta = last.interferenceGap - previous.interferenceGap;
+          if (costDelta === 0) {
+            statements.push('Stroop cost stayed level between rounds (conflict monitoring stable).');
+          } else if (costDelta > 0) {
+            statements.push(`Stroop cost increased by ${costDelta}% in the latest round, pointing to greater ACC conflict signals.`);
+          } else {
+            statements.push(`Stroop cost eased by ${Math.abs(costDelta)}% in the latest round—conflict signals were resolved faster.`);
+          }
+        }
+        return `Round ${last.roundNumber} vs Round ${previous.roundNumber}: ${statements.join(' ')}`;
+      }
+
+      function buildModeComparisonNarrative() {
+        // Compare the two most recent modes in the timeline
+        if (roundHistory.length < 2) {
+          return 'Complete more modes to spot within-round trends.';
+        }
+        const last = roundHistory[roundHistory.length - 1];
+        const previous = roundHistory[roundHistory.length - 2];
+        const statements = [];
+        const accDelta = last.accuracy - previous.accuracy;
+        if (accDelta === 0) {
+          statements.push(`${last.modeName} accuracy matched ${previous.modeName}, indicating comparable control demand.`);
+        } else if (accDelta > 0) {
+          statements.push(`${last.modeName} accuracy improved by ${accDelta}% over ${previous.modeName}, hinting at stronger selective attention in that condition.`);
+        } else {
+          statements.push(`${last.modeName} accuracy fell ${Math.abs(accDelta)}% versus ${previous.modeName}; interference was tougher to suppress.`);
+        }
+        if (last.averageReaction !== null && previous.averageReaction !== null) {
+          const speedDelta = last.averageReaction - previous.averageReaction;
+          if (speedDelta === 0) {
+            statements.push('Reaction speed held steady (load balanced).');
+          } else if (speedDelta > 0) {
+            statements.push(`${last.modeName} ran ${speedDelta} ms slower than ${previous.modeName}, revealing extra processing to resolve interference.`);
+          } else {
+            statements.push(`${last.modeName} ran ${Math.abs(speedDelta)} ms faster than ${previous.modeName}, reflecting fast conflict resolution.`);
+          }
+        }
+        if (last.interferenceGap !== null && previous.interferenceGap !== null) {
+          const costDelta = last.interferenceGap - previous.interferenceGap;
+          if (costDelta === 0) {
+            statements.push('Stroop cost stayed level between the two modes (ACC conflict signal unchanged).');
+          } else if (costDelta > 0) {
+            statements.push(`${last.modeName} showed ${costDelta}% more Stroop cost than ${previous.modeName}, implying heavier conflict monitoring.`);
+          } else {
+            statements.push(`${last.modeName} showed ${Math.abs(costDelta)}% less Stroop cost than ${previous.modeName}, meaning control engaged earlier.`);
+          }
+        }
+        return statements.join(' ');
+      }
+
+      function getModeEntryForRound(roundNumber, modeId) {
+        if (roundNumber == null || !modeId) {
+          return null;
+        }
+        for (let i = roundHistory.length - 1; i >= 0; i -= 1) {
+          const entry = roundHistory[i];
+          if (entry.macroRound === roundNumber && entry.modeId === modeId) {
+            return entry;
+          }
+        }
+        return null;
+      }
+
+      function evaluateAdaptiveControl(lastRound, previousRound) {
+        if (!lastRound || !previousRound) {
+          return '';
+        }
+        const latestText = getModeEntryForRound(lastRound.roundNumber, 'text-only');
+        const previousText = getModeEntryForRound(previousRound.roundNumber, 'text-only');
+        if (!latestText || !previousText) {
+          return '';
+        }
+        const accDelta = (latestText.accuracy ?? 0) - (previousText.accuracy ?? 0);
+        const reactionDelta = (latestText.averageReaction ?? 0) - (previousText.averageReaction ?? 0);
+        if (accDelta >= 3 && reactionDelta <= 0) {
+          return `Adaptive control improvement detected: Text Targets accuracy climbed ${accDelta}% while reactions stayed steady, suggesting earlier conflict anticipation.`;
+        }
+        if (reactionDelta < -80) {
+          return `Text Targets reactions sped up by ${Math.abs(reactionDelta)} ms with accuracy intact—evidence of automatization and proactive control.`;
+        }
+        if (accDelta >= 3) {
+          return `Text Targets accuracy improved by ${accDelta}% round-over-round, pointing to stronger conflict preparation.`;
+        }
+        return '';
+      }
+
+      function evaluateSpeedAccuracyStrategy(lastRound) {
+        if (!lastRound) {
+          return '';
+        }
+        if (lastRound.trials && lastRound.trials < 20 && lastRound.accuracy >= 90 && (lastRound.averageReaction ?? 0) > 1200) {
+          return 'Speed-accuracy trade-off alert: low trial volume, high accuracy, and slower reactions imply a cautious strategy—deliberate checks before responding.';
+        }
+        if (lastRound.accuracy >= 95 && (lastRound.averageReaction ?? 0) > 1100) {
+          return 'High accuracy with extended reaction times suggests a deliberate, accuracy-first control style.';
+        }
+        return '';
+      }
+
+      function evaluateExecutiveControlLoad(lastRound) {
+        if (!lastRound || lastRound.averageReaction == null) {
+          return '';
+        }
+        if (lastRound.averageReaction >= 2000) {
+          return `Mean latency around ${lastRound.averageReaction} ms indicates heavy DLPFC engagement—classic of sustained, non-automatic responding.`;
+        }
+        if (lastRound.averageReaction >= 1500) {
+          return `Average reaction ${lastRound.averageReaction} ms reflects prolonged top-down control; you are holding attention deliberately on each conflict.`;
+        }
+        return '';
+      }
+
+      function evaluateIndividualProfile(lastRound, previousRound) {
+        if (!lastRound) {
+          return '';
+        }
+        if (lastRound.accuracy >= 90 && (lastRound.averageReaction ?? 0) > 1100) {
+          if (previousRound && previousRound.accuracy >= 90 && (previousRound.averageReaction ?? 0) > 1100) {
+            return 'Consistently high accuracy with slower responses across rounds suggests a deliberative cognitive profile—prioritizing control stability over speed.';
+          }
+          return 'Latest round shows high accuracy paired with slower responses—evidence of a careful, accuracy-first processing style.';
+        }
+        if (previousRound && lastRound.accuracy >= 90 && previousRound.accuracy < 90 && (lastRound.averageReaction ?? 0) <= (previousRound.averageReaction ?? Infinity)) {
+          return 'Accuracy improved while reactions shortened—your control system is becoming more efficient without sacrificing precision.';
+        }
+        return '';
+      }
+
+      function evaluateInterferenceIndex(lastRoundRoundNumber) {
+        if (lastRoundRoundNumber == null) {
+          return '';
+        }
+        const modeMessages = [];
+        MODES.forEach(mode => {
+          const entry = getModeEntryForRound(lastRoundRoundNumber, mode.id);
+        if (!entry) {
+          return;
+        }
+        if (entry.mismatchAccuracy == null || entry.congruentAccuracy == null) {
+          return;
+        }
+        const diff = entry.congruentAccuracy - entry.mismatchAccuracy;
+        if (diff >= 0) {
+          modeMessages.push(`${mode.name} Stroop cost: ${diff}%`);
+        } else {
+          modeMessages.push(`${mode.name} Stroop cost: ${Math.abs(diff)}% reversal`);
+        }
+      });
+        if (!modeMessages.length) {
+          return '';
+        }
+        return `Per-mode interference index — ${modeMessages.join('; ')}.`;
+      }
+
+      const modeSummaryLines = [];
+      MODES.forEach(mode => {
+        modeSummaryLines.push(formatModeSummary(modeStats[mode.id]));
+      });
+      Object.keys(modeStats)
+        .filter(key => !MODES.some(mode => mode.id === key))
+        .forEach(key => {
+          modeSummaryLines.push(formatModeSummary(modeStats[key]));
+        });
+
+      const narratives = [
+        buildMacroComparisonNarrative(lastMacroRound, previousMacroRound),
+        buildCognitiveLoadNarrative(lastMacroRound, macroTotals),
+        buildStroopNarrative(modeStats, macroCost, macroTotals.trials),
+        evaluateParallelProcessing(modeStats['color-only'], modeStats['labeled']),
+        evaluateTextTargets(modeStats['text-only'], modeStats['color-only'], modeStats['labeled']),
+        buildModeComparisonNarrative(),
+        evaluateAdaptiveControl(lastMacroRound, previousMacroRound),
+        evaluateSpeedAccuracyStrategy(lastMacroRound),
+        evaluateExecutiveControlLoad(lastMacroRound),
+        evaluateIndividualProfile(lastMacroRound, previousMacroRound),
+        evaluateInterferenceIndex(lastMacroRound ? lastMacroRound.roundNumber : null)
+      ].filter(Boolean).map(text => `<p>${text}</p>`).join('\n');
+
+      historyEl.innerHTML = `
+        <h2>Session Insights</h2>
+        <h3>Round Overview</h3>
+        <ul>
+          ${macroSummaryItems.map(item => `<li>${item}</li>`).join('')}
+        </ul>
+        <h3>Mode Performance</h3>
+        <ul>
+          ${modeSummaryLines.map(item => `<li>${item}</li>`).join('')}
+        </ul>
+        ${narratives}
+      `;
+      renderCharts();
+    }
+
+    function renderCharts() {
+      renderReactionChart();
+      renderStroopChart();
+    }
+
+    function renderReactionChart() {
+      if (!reactionChartEl) {
+        return;
+      }
+      reactionChartEl.innerHTML = '';
+      const latestRound = macroHistory[macroHistory.length - 1];
+      if (!latestRound) {
+        reactionChartEl.innerHTML = '<p class="chart-empty">Complete a round to visualize reaction speeds.</p>';
+        return;
+      }
+
+      let modeEntries = Array.isArray(latestRound.modeDetails) && latestRound.modeDetails.length > 0
+        ? latestRound.modeDetails
+        : roundHistory.filter(entry => entry.macroRound === latestRound.roundNumber);
+
+      if (!modeEntries.length) {
+        reactionChartEl.innerHTML = '<p class="chart-empty">Reaction metrics pending for the latest round.</p>';
+        return;
+      }
+
+      const container = document.createElement('div');
+      const values = modeEntries.map(detail => ({
+        name: detail.modeName,
+        modeId: detail.modeId,
+        reaction: detail.metrics?.averageReaction ?? detail.averageReaction ?? null
+      })).filter(item => item.reaction !== null);
+
+      if (values.length === 0) {
+        reactionChartEl.innerHTML = '<p class="chart-empty">Reaction metrics pending for the latest round.</p>';
+        return;
+      }
+
+      const maxValue = Math.max(...values.map(item => item.reaction), 1);
+
+      values.forEach(item => {
+        const barRow = document.createElement('div');
+        barRow.className = 'chart-bar';
+
+        const label = document.createElement('div');
+        label.className = 'chart-bar-label';
+        label.textContent = item.name;
+
+        const track = document.createElement('div');
+        track.className = 'chart-bar-track';
+
+        const fill = document.createElement('div');
+        fill.className = 'chart-bar-fill';
+        const widthPercent = Math.max((item.reaction / maxValue) * 100, 4);
+        fill.style.width = `${widthPercent}%`;
+        const modeColor = MODE_COLORS[item.modeId] || '#4dabf7';
+        fill.style.background = modeColor;
+
+        const valueLabel = document.createElement('div');
+        valueLabel.className = 'chart-bar-value';
+        valueLabel.textContent = `${Math.round(item.reaction)} ms`;
+
+        track.appendChild(fill);
+        barRow.appendChild(label);
+        barRow.appendChild(track);
+        barRow.appendChild(valueLabel);
+        container.appendChild(barRow);
+      });
+
+      const caption = document.createElement('p');
+      caption.className = 'chart-caption';
+      caption.textContent = 'Shorter bars indicate faster average reactions — a proxy for lower cognitive load.';
+
+      reactionChartEl.appendChild(container);
+      reactionChartEl.appendChild(caption);
+    }
+
+    function renderStroopChart() {
+      if (!stroopChartEl) {
+        return;
+      }
+      stroopChartEl.innerHTML = '';
+      const costData = macroHistory
+        .filter(round => typeof round.interferenceGap === 'number' && !Number.isNaN(round.interferenceGap))
+        .map(round => ({ round: round.roundNumber, cost: round.interferenceGap }));
+
+      if (costData.length < 2) {
+        stroopChartEl.innerHTML = '<p class="chart-empty">Complete at least two rounds to view Stroop cost trends.</p>';
+        return;
+      }
+
+      const minCost = Math.min(...costData.map(point => point.cost), 0);
+      const maxCost = Math.max(...costData.map(point => point.cost), 0);
+      const spread = maxCost - minCost || 1;
+      const width = 110;
+      const height = 110;
+      const marginX = 10;
+      const marginY = 14;
+
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(svgNS, 'svg');
+      svg.setAttribute('class', 'chart-svg');
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+      const axis = document.createElementNS(svgNS, 'line');
+      axis.setAttribute('x1', marginX);
+      axis.setAttribute('y1', height - marginY);
+      axis.setAttribute('x2', width - marginX);
+      axis.setAttribute('y2', height - marginY);
+      axis.setAttribute('stroke', '#d0d8e8');
+      axis.setAttribute('stroke-width', '1');
+      svg.appendChild(axis);
+
+      const polyline = document.createElementNS(svgNS, 'polyline');
+      const points = costData.map((point, index) => {
+        const x = marginX + (index / (costData.length - 1)) * (width - marginX * 2);
+        const y = height - marginY - ((point.cost - minCost) / spread) * (height - marginY * 2);
+        return `${x},${y}`;
+      }).join(' ');
+      polyline.setAttribute('points', points);
+      polyline.setAttribute('fill', 'none');
+      polyline.setAttribute('stroke', '#ff922b');
+      polyline.setAttribute('stroke-width', '2.2');
+      svg.appendChild(polyline);
+
+      costData.forEach((point, index) => {
+        const x = marginX + (index / (costData.length - 1)) * (width - marginX * 2);
+        const y = height - marginY - ((point.cost - minCost) / spread) * (height - marginY * 2);
+        const circle = document.createElementNS(svgNS, 'circle');
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', 2.8);
+        circle.setAttribute('fill', '#ff922b');
+        svg.appendChild(circle);
+      });
+
+      stroopChartEl.appendChild(svg);
+
+      const caption = document.createElement('p');
+      caption.className = 'chart-caption';
+      const lastPoint = costData[costData.length - 1];
+      const direction = lastPoint.cost >= costData[0].cost ? 'increased' : 'decreased';
+      caption.textContent = `Stroop cost has ${direction} from ${Math.round(costData[0].cost)}% to ${Math.round(lastPoint.cost)}% across your saved rounds.`;
+      stroopChartEl.appendChild(caption);
+    }
+
+    function setButtonsDisabled(disabled) {
+      const buttons = buttonsContainer.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.disabled = disabled;
+        button.style.boxShadow = disabled ? 'none' : '0 6px 14px rgba(34, 47, 62, 0.18)';
+      });
+    }
+
+    updateConfigInputs();
+    handleDurationInput();
+    handleConflictInput();
+
+    // Wire up controls and boot the experience
+    if (durationInput) {
+      durationInput.addEventListener('input', handleDurationInput);
+    }
+    if (conflictInput) {
+      conflictInput.addEventListener('input', handleConflictInput);
+    }
+    if (applyConfigButton) {
+      applyConfigButton.addEventListener('click', applySessionConfigFromInputs);
+    }
+    if (persistToggle) {
+      persistToggle.addEventListener('change', handlePersistToggle);
+    }
+    if (exportButton) {
+      exportButton.addEventListener('click', handleExportClick);
+    }
+    if (resetButton) {
+      resetButton.addEventListener('click', handleResetClick);
+    }
+    startButton.addEventListener('click', handleStartButtonClick);
+    initButtons();
+    applyButtonLabels(MODES[currentModeIndex].showLabels);
+    applyButtonStylesForMode(MODES[currentModeIndex]);
+    loadPersistedState();
+    currentTimeLeft = sessionConfig.roundDuration;
+    timerEl.textContent = `Time: ${sessionConfig.roundDuration}s`;
+    setButtonsDisabled(true);
+    hydrateScoreboardFromHistory();
+    hydrateRoundSummary();
+    updateHistoryInsights();
+    syncModeUI();
+    feedbackEl.textContent = macroHistory.length > 0
+      ? `Welcome back! Start Round ${macroRoundNumber + 1} when you're ready to collect more data.`
+      : 'Start Round 1 to begin the three-mode cycle.';
+  </script>
+</body>
+</html>
