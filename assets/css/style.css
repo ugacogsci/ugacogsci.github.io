@@ -341,6 +341,53 @@ img.logo {
   align-items: start;
 }
 
+/* Social Links */
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.social-link:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.social-action {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.social-platform {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 720px) {
+  .social-link {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .social-platform {
+    max-width: 200px;
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 720px) {
   .list .item {
     padding: 10px;
