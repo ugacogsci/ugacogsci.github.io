@@ -15,6 +15,9 @@
           <div class="logo" aria-hidden="true"><img src="assets/img/cogsciclub.png" alt="UGA Cognitive Science Club Logo" /></div>
           <span>UGA Cognitive Science Club</span>
         </a>
+        <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+          <span class="hamburger"></span>
+        </button>
         <nav class="nav" aria-label="Primary">
           <a data-nav href="index.html">Home</a>
           <a data-nav href="resources.html">Resources</a>
@@ -43,6 +46,16 @@
 
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+    
+    // Mobile menu functionality
+    const menuToggle = document.querySelector('.menu-toggle');
+    if (menuToggle) {
+      menuToggle.addEventListener('click', () => {
+        const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+        menuToggle.setAttribute('aria-expanded', !isExpanded);
+      });
+    }
   </script>
 </body>
 </html>
+
