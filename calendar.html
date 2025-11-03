@@ -44,7 +44,9 @@
         e.datetimes.map(datetime => ({
           ...e, 
           datetime: datetime,
-          t: new Date(e.datetime)}))
+          t: new Date(e.datetime)
+        }))
+      )
       .sort((a,b)=>a.t-b.t);
       upcoming.forEach(e => {
         const item = document.createElement('div');
