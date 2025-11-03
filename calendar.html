@@ -40,13 +40,14 @@
   <script>
     fetch('events.json', {cache:'no-store'}).then(r=>r.json()).then(data => {
       const mount = document.getElementById('events');
-      const upcoming = data.events.flatMap(e => 
-        e.datetimes.map(datetime => ({
+      const upcoming = data.events.flatMap(e => {
+        const dates = Array.isArray(e.datetimes) ? e.datetimes : [e.datetime];
+        return dates.map(datetime => ({
           ...e, 
           datetime: datetime,
-          t: new Date(e.datetime)
-        }))
-      )
+          t: new Date(datetime)
+        }));
+      })
       .sort((a,b)=>a.t-b.t);
       upcoming.forEach(e => {
         const item = document.createElement('div');
