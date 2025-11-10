@@ -2,7 +2,7 @@ const tasks = {
   "digit-span": {
     name: "Digit Span Task",
     summary:
-      "Run baseline digit recall until three cumulative errors, then unlock delimiter-assisted (chunked) trials automatically.",
+      "Begin at 5 digits and add one per round; three mistakes end baseline and unlock delimiter-assisted chunking trials that follow the same rule.",
     highlights: [
       "Digits display for 3 seconds before the response window opens.",
       "Three errors end the current phase; perfect streaks extend indefinitely.",
@@ -47,7 +47,6 @@ const DIGIT_SPAN_TASK_KEY = "digit-span";
 const DIGIT_SPAN_ERROR_LIMIT = 3;
 const DIGIT_SPAN_DISPLAY_MS = 3000;
 const DIGIT_SPAN_MIN_LENGTH = 5;
-const DIGIT_SPAN_MAX_LENGTH = 12;
 
 let activeTaskKey = null;
 let chunkingState = null;
@@ -223,12 +222,13 @@ function updateChunkingSummary() {
   if (chunkingState?.inProgress) {
     const phaseLabel =
       chunkingState.phase === "chunked" ? "Chunked Recall · Delimiters" : "Baseline Recall · No Delimiters";
+    const nextLength = DIGIT_SPAN_MIN_LENGTH + chunkingState.phaseRoundCount;
     progress += `<p><strong>Phase:</strong> ${phaseLabel}</p>`;
-    progress += `<p>Rounds completed: ${chunkingState.rounds.length} · Errors this phase: ${chunkingState.errorsInPhase}/${DIGIT_SPAN_ERROR_LIMIT}</p>`;
+    progress += `<p>Next sequence length: ${nextLength} digits · Errors this phase: ${chunkingState.errorsInPhase}/${DIGIT_SPAN_ERROR_LIMIT}</p>`;
     if (chunkingState.phase === "baseline") {
-      progress += "<p>Three errors unlock chunked digits. Perfect streaks continue indefinitely.</p>";
+      progress += "<p>Three imperfect recalls move you into the chunked condition.</p>";
     } else {
-      progress += "<p>Three errors end the chunked phase and finalize the session.</p>";
+      progress += "<p>Chunked trials also end after three imperfect recalls.</p>";
     }
   }
 
@@ -348,25 +348,28 @@ function runChunkingRound() {
     chunkingState.timeoutId = null;
   }
 
+  if (chunkingState.errorsInPhase >= DIGIT_SPAN_ERROR_LIMIT) {
+    if (chunkingState.phase === "baseline") {
+      transitionToChunkedPhase();
+    } else {
+      finishChunkingSession();
+    }
+    return;
+  }
+
   const isChunkedPhase = chunkingState.phase === "chunked";
   const phaseLabel = isChunkedPhase ? "Chunked Recall · Delimiters" : "Baseline Recall · No Delimiters";
-  const nextRoundNumber = chunkingState.phaseRoundCount + 1;
-  const maxIncrement = DIGIT_SPAN_MAX_LENGTH - DIGIT_SPAN_MIN_LENGTH;
-  const lengthIncrement = Math.min(chunkingState.phaseRoundCount, maxIncrement);
-  const sequenceLength = DIGIT_SPAN_MIN_LENGTH + lengthIncrement;
+  const sequenceLength = DIGIT_SPAN_MIN_LENGTH + chunkingState.phaseRoundCount;
   const sequence = createDigitSequence(sequenceLength);
   const withDelimiters = isChunkedPhase;
-  const errorsRemaining = Math.max(
-    DIGIT_SPAN_ERROR_LIMIT - chunkingState.errorsInPhase,
-    0
-  );
+  const errorsRemaining = Math.max(DIGIT_SPAN_ERROR_LIMIT - chunkingState.errorsInPhase, 0);
 
   chunkingState.currentSequence = sequence;
   chunkingState.withDelimiters = withDelimiters;
   chunkingState.awaitingInput = false;
 
   chunkingUI.phase.textContent = phaseLabel;
-  chunkingUI.progress.textContent = `Round ${nextRoundNumber} · Errors ${chunkingState.errorsInPhase}/${DIGIT_SPAN_ERROR_LIMIT}`;
+  chunkingUI.progress.textContent = `Round ${chunkingState.phaseRoundCount + 1} · ${sequenceLength} digits · Errors ${chunkingState.errorsInPhase}/${DIGIT_SPAN_ERROR_LIMIT}`;
 
   lockChunkingInput(true);
 
@@ -376,7 +379,7 @@ function runChunkingRound() {
   chunkingUI.input.placeholder = `Enter ${sequenceLength} digits`;
   chunkingUI.feedback.textContent = `Memorize ${sequenceLength} digits${
     withDelimiters ? " with chunk markers." : ""
-  }. Errors remaining: ${errorsRemaining}.`;
+  }. Errors remaining this phase: ${errorsRemaining}.`;
 
   restartChunkingTimer(DIGIT_SPAN_DISPLAY_MS);
 
@@ -490,7 +493,8 @@ function handleChunkingSubmit(event) {
   }
 
   const accuracy = digitsRequired === 0 ? 0 : correctCount / digitsRequired;
-  const errorsThisRound = Math.max(digitsRequired - correctCount, 0);
+  const roundPerfect = normalizedResponse === target;
+  const errorsThisRound = roundPerfect ? 0 : 1;
   const phaseRecorded = chunkingState.phase;
   chunkingState.rounds.push({
     round: chunkingState.roundIndex + 1,
