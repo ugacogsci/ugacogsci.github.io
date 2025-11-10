@@ -1,49 +1,26 @@
 const tasks = {
-  chunking: {
-    name: "Chunking: Magic Number 7 ± 2",
-    summary:
-      "Compare baseline span to chunking-aided recall across a paced 20-round session.",
-    highlights: [
-      "Runs 10 baseline rounds without delimiters followed by 10 with chunk markers.",
-      "Displays each digit sequence for 3 seconds before collecting responses.",
-      "Scores per-digit accuracy and logs baseline vs chunking averages.",
-    ],
-    stagePlaceholder:
-      "Launch the session to begin baseline rounds. Results will compare baseline vs chunking-assisted recall.",
-  },
   "digit-span": {
-    name: "Digit Span",
+    name: "Digit Span Task",
     summary:
-      "Classic forward/backward span assessment with adaptive list lengths.",
+      "Run baseline digit recall until three cumulative errors, then unlock delimiter-assisted (chunked) trials automatically.",
     highlights: [
-      "Toggle between forward, backward, and adaptive difficulty.",
-      "Records response latency and accuracy per sequence.",
-      "Optional paced playback for timed rehearsals.",
+      "Digits display for 3 seconds before the response window opens.",
+      "Three errors end the current phase; perfect streaks extend indefinitely.",
+      "Live scoreboard compares baseline accuracy against chunked recall.",
     ],
     stagePlaceholder:
-      "Digits will play in sequence here. Select direction and pacing options prior to running trials.",
-  },
-  "n-back": {
-    name: "N-Back",
-    summary: "Continuous performance task measuring updating efficiency.",
-    highlights: [
-      "Supports visual, auditory, or dual-modality streams.",
-      "Difficulty adapts by incrementing N after consecutive hits.",
-      "Live performance metrics shown after each block.",
-    ],
-    stagePlaceholder:
-      "Stimuli stream will appear here. Configure N-level, modality, and block length to begin.",
+      "Digits will render here. Once three errors occur, the task switches to chunked recall automatically.",
   },
   "pattern-recall": {
-    name: "Pattern Recall",
-    summary: "Visuospatial memory test using briefly displayed grids.",
+    name: "Corsi Pattern Recall",
+    summary: "Visuospatial span task using sequenced block taps (Corsi board).",
     highlights: [
-      "Grid size scales to adjust difficulty per participant.",
-      "Allows masks between presentation and recall windows.",
-      "Captures reconstruction accuracy and time-on-task.",
+      "Adaptive block patterns tap into forward/backward visuospatial span.",
+      "Timing windows can add interference or rehearsal delays.",
+      "Performance summary captures longest span and average accuracy.",
     ],
     stagePlaceholder:
-      "Pattern grids render here. Set presentation duration and grid complexity prior to launch.",
+      "Corsi block patterns will appear here. Configure block count and presentation timing before launching.",
   },
   "story-chain": {
     name: "Story Chain",
@@ -66,9 +43,11 @@ const taskStage = document.getElementById("task-stage");
 const taskDetailsSection = document.getElementById("task-details");
 const taskHighlightsList = document.getElementById("task-highlights");
 
-const CHUNKING_ROUNDS = 20;
-const CHUNKING_HALF = CHUNKING_ROUNDS / 2;
-const CHUNKING_DISPLAY_MS = 3000;
+const DIGIT_SPAN_TASK_KEY = "digit-span";
+const DIGIT_SPAN_ERROR_LIMIT = 3;
+const DIGIT_SPAN_DISPLAY_MS = 3000;
+const DIGIT_SPAN_MIN_LENGTH = 5;
+const DIGIT_SPAN_MAX_LENGTH = 12;
 
 let activeTaskKey = null;
 let chunkingState = null;
@@ -145,6 +124,32 @@ const resetTaskCards = () => {
   taskCards.forEach((card) => card.classList.remove("active"));
 };
 
+const restartChunkingTimer = (durationMs) => {
+  const timer = chunkingUI?.timer;
+  if (!timer) {
+    return;
+  }
+
+  timer.style.transition = "none";
+  timer.style.opacity = "1";
+  timer.style.transform = "scaleX(1)";
+  timer.getBoundingClientRect();
+  window.requestAnimationFrame(() => {
+    timer.style.transition = `transform ${durationMs}ms linear`;
+    timer.style.transform = "scaleX(0)";
+  });
+};
+
+const stopChunkingTimer = () => {
+  const timer = chunkingUI?.timer;
+  if (!timer) {
+    return;
+  }
+  timer.style.transition = "none";
+  timer.style.transform = "scaleX(0)";
+  timer.style.opacity = "0";
+};
+
 const createDigitSequence = (length) =>
   Array.from({ length }, () => Math.floor(Math.random() * 10)).join("");
 
@@ -193,7 +198,7 @@ function updateChunkingSummary() {
 
   if (!activeRounds.length && !chunkingHistory.length) {
     chunkingUI.summary.innerHTML =
-      "<p>Launch a session to compare baseline (no delimiters) versus chunking-aided recall.</p>";
+      "<p>Launch the Digit Span Task to log baseline accuracy, then compare it with chunked recall.</p>";
     return;
   }
 
@@ -204,7 +209,7 @@ function updateChunkingSummary() {
         <strong>${formatPercent(baselineScore)}</strong>
       </div>
       <div>
-        <span>Chunking Avg</span>
+        <span>Chunked Avg</span>
         <strong>${formatPercent(chunkedScore)}</strong>
       </div>
       <div>
@@ -216,12 +221,14 @@ function updateChunkingSummary() {
 
   let progress = "";
   if (chunkingState?.inProgress) {
-    const completed = chunkingState.rounds.length;
-    progress += `<p><strong>Session progress:</strong> ${completed}/${CHUNKING_ROUNDS} rounds completed.</p>`;
-    if (chunkingState.roundIndex < CHUNKING_HALF) {
-      progress += `<p>Currently running baseline round ${chunkingState.roundIndex + 1} of ${CHUNKING_HALF}.</p>`;
-    } else if (chunkingState.roundIndex < CHUNKING_ROUNDS) {
-      progress += `<p>Running chunking-aided round ${chunkingState.roundIndex - CHUNKING_HALF + 1} of ${CHUNKING_HALF}.</p>`;
+    const phaseLabel =
+      chunkingState.phase === "chunked" ? "Chunked Recall · Delimiters" : "Baseline Recall · No Delimiters";
+    progress += `<p><strong>Phase:</strong> ${phaseLabel}</p>`;
+    progress += `<p>Rounds completed: ${chunkingState.rounds.length} · Errors this phase: ${chunkingState.errorsInPhase}/${DIGIT_SPAN_ERROR_LIMIT}</p>`;
+    if (chunkingState.phase === "baseline") {
+      progress += "<p>Three errors unlock chunked digits. Perfect streaks continue indefinitely.</p>";
+    } else {
+      progress += "<p>Three errors end the chunked phase and finalize the session.</p>";
     }
   }
 
@@ -238,7 +245,7 @@ function updateChunkingSummary() {
                  hour: "2-digit",
                  minute: "2-digit",
                })}</span>
-               Baseline: ${formatPercent(entry.baselineScore)} · Chunking: ${formatPercent(
+               Baseline: ${formatPercent(entry.baselineScore)} · Chunked: ${formatPercent(
                  entry.chunkedScore
                )} · Overall: ${formatPercent(entry.overallScore)}
              </li>
@@ -259,6 +266,7 @@ function resetChunkingSession({ aborted = false } = {}) {
 
   lockChunkingInput(false);
   exitChunkingFullscreen();
+  stopChunkingTimer();
 
   if (chunkingState.timeoutId) {
     window.clearTimeout(chunkingState.timeoutId);
@@ -268,7 +276,7 @@ function resetChunkingSession({ aborted = false } = {}) {
   }
 
   if (chunkingUI && aborted) {
-    chunkingUI.display.textContent = "Session aborted. Select launch to restart.";
+    chunkingUI.displayText.textContent = "Session aborted. Select launch to restart.";
     chunkingUI.feedback.textContent =
       "Baseline vs chunking scores will reset with the next session.";
     chunkingUI.form.hidden = true;
@@ -296,8 +304,8 @@ function finishChunkingSession() {
   }
 
   const rounds = [...chunkingState.rounds];
-  const baselineRounds = rounds.slice(0, CHUNKING_HALF);
-  const chunkedRounds = rounds.slice(CHUNKING_HALF);
+  const baselineRounds = rounds.filter((round) => !round.withDelimiters);
+  const chunkedRounds = rounds.filter((round) => round.withDelimiters);
 
   const baselineScore = averageAccuracy(baselineRounds) ?? 0;
   const chunkedScore = averageAccuracy(chunkedRounds) ?? 0;
@@ -311,11 +319,12 @@ function finishChunkingSession() {
     overallScore,
   });
 
-  chunkingUI.display.textContent =
+  chunkingUI.displayText.textContent =
     "Session complete. Compare baseline and chunking-aided performance below.";
   chunkingUI.feedback.textContent = "Launch again to collect another data point.";
   chunkingUI.form.hidden = true;
   chunkingState.inProgress = false;
+  stopChunkingTimer();
 
   updateChunkingSummary();
 
@@ -334,48 +343,42 @@ function runChunkingRound() {
     return;
   }
 
-  if (chunkingState.roundIndex >= CHUNKING_ROUNDS) {
-    finishChunkingSession();
-    return;
-  }
-
   if (chunkingState.timeoutId) {
     window.clearTimeout(chunkingState.timeoutId);
     chunkingState.timeoutId = null;
   }
 
-  const roundIndex = chunkingState.roundIndex;
-  const phaseLabel =
-    roundIndex < CHUNKING_HALF
-      ? "Baseline · No Delimiters"
-      : "Chunking Aids · Delimiters";
-  const phaseRound =
-    roundIndex < CHUNKING_HALF
-      ? roundIndex + 1
-      : roundIndex - CHUNKING_HALF + 1;
-
-  chunkingUI.phase.textContent = phaseLabel;
-  chunkingUI.progress.textContent = `Round ${phaseRound} of ${CHUNKING_HALF}`;
-
-  const sequenceLength = 5 + (roundIndex % CHUNKING_HALF);
+  const isChunkedPhase = chunkingState.phase === "chunked";
+  const phaseLabel = isChunkedPhase ? "Chunked Recall · Delimiters" : "Baseline Recall · No Delimiters";
+  const nextRoundNumber = chunkingState.phaseRoundCount + 1;
+  const maxIncrement = DIGIT_SPAN_MAX_LENGTH - DIGIT_SPAN_MIN_LENGTH;
+  const lengthIncrement = Math.min(chunkingState.phaseRoundCount, maxIncrement);
+  const sequenceLength = DIGIT_SPAN_MIN_LENGTH + lengthIncrement;
   const sequence = createDigitSequence(sequenceLength);
-  const withDelimiters = roundIndex >= CHUNKING_HALF;
+  const withDelimiters = isChunkedPhase;
+  const errorsRemaining = Math.max(
+    DIGIT_SPAN_ERROR_LIMIT - chunkingState.errorsInPhase,
+    0
+  );
 
   chunkingState.currentSequence = sequence;
   chunkingState.withDelimiters = withDelimiters;
   chunkingState.awaitingInput = false;
 
+  chunkingUI.phase.textContent = phaseLabel;
+  chunkingUI.progress.textContent = `Round ${nextRoundNumber} · Errors ${chunkingState.errorsInPhase}/${DIGIT_SPAN_ERROR_LIMIT}`;
+
   lockChunkingInput(true);
 
-  chunkingUI.display.textContent = withDelimiters
-    ? formatWithDelimiters(sequence)
-    : sequence;
+  chunkingUI.displayText.textContent = withDelimiters ? formatWithDelimiters(sequence) : sequence;
   chunkingUI.form.hidden = true;
   chunkingUI.input.value = "";
   chunkingUI.input.placeholder = `Enter ${sequenceLength} digits`;
   chunkingUI.feedback.textContent = `Memorize ${sequenceLength} digits${
-    withDelimiters ? " with chunk markers." : "."
-  }`;
+    withDelimiters ? " with chunk markers." : ""
+  }. Errors remaining: ${errorsRemaining}.`;
+
+  restartChunkingTimer(DIGIT_SPAN_DISPLAY_MS);
 
   chunkingState.timeoutId = window.setTimeout(() => {
     chunkingState.timeoutId = null;
@@ -383,17 +386,49 @@ function runChunkingRound() {
       return;
     }
 
-    chunkingUI.display.textContent = "Re-enter the sequence.";
+    chunkingUI.displayText.textContent = "Re-enter the sequence.";
     chunkingUI.form.hidden = false;
     chunkingUI.input.focus({ preventScroll: true });
     lockChunkingInput(false);
     chunkingState.awaitingInput = true;
-    chunkingUI.feedback.textContent =
-      "Accuracy is per digit. Partial recall still counts.";
-  }, CHUNKING_DISPLAY_MS);
+    chunkingUI.feedback.textContent = "Accuracy is per digit. Partial recall still counts.";
+    stopChunkingTimer();
+  }, DIGIT_SPAN_DISPLAY_MS);
 
   updateChunkingSummary();
 }
+
+const transitionToChunkedPhase = () => {
+  if (!chunkingState || !chunkingUI) {
+    return;
+  }
+  if (chunkingState.phase === "chunked") {
+    return;
+  }
+
+  chunkingState.phase = "chunked";
+  chunkingState.errorsInPhase = 0;
+  chunkingState.phaseRoundCount = 0;
+  chunkingState.chunkedUnlocked = true;
+  chunkingState.awaitingInput = false;
+
+  lockChunkingInput(true);
+  chunkingUI.form.hidden = true;
+  chunkingUI.displayText.textContent = "Chunked recall begins now.";
+  chunkingUI.feedback.textContent =
+    "Delimiter-assisted digits unlocked. Watch for chunk markers in the upcoming sequence.";
+  stopChunkingTimer();
+  updateChunkingSummary();
+
+  if (chunkingState.pendingNextRoundId) {
+    window.clearTimeout(chunkingState.pendingNextRoundId);
+  }
+
+  chunkingState.pendingNextRoundId = window.setTimeout(() => {
+    chunkingState.pendingNextRoundId = null;
+    runChunkingRound();
+  }, 1200);
+};
 
 function startChunkingSession() {
   if (chunkingState?.inProgress) {
@@ -413,6 +448,10 @@ function startChunkingSession() {
     timeoutId: null,
     pendingNextRoundId: null,
     inProgress: true,
+    phase: "baseline",
+    errorsInPhase: 0,
+    phaseRoundCount: 0,
+    chunkedUnlocked: false,
   };
 
   enterChunkingFullscreen();
@@ -422,9 +461,9 @@ function startChunkingSession() {
   launchButton.disabled = true;
   settingsButton.disabled = true;
 
-  chunkingUI.display.textContent = "Get ready...";
+  chunkingUI.displayText.textContent = "Get ready...";
   chunkingUI.feedback.textContent =
-    "Baseline phase starts with 5 digits. Watch closely!";
+    "Baseline digits display first. Three errors will unlock the chunked recall phase.";
   chunkingUI.form.hidden = true;
 
   updateChunkingSummary();
@@ -451,12 +490,16 @@ function handleChunkingSubmit(event) {
   }
 
   const accuracy = digitsRequired === 0 ? 0 : correctCount / digitsRequired;
+  const errorsThisRound = Math.max(digitsRequired - correctCount, 0);
+  const phaseRecorded = chunkingState.phase;
   chunkingState.rounds.push({
     round: chunkingState.roundIndex + 1,
     withDelimiters: chunkingState.withDelimiters,
     length: digitsRequired,
     correctCount,
     accuracy,
+    errors: errorsThisRound,
+    phase: phaseRecorded,
     response: normalizedResponse,
     target,
   });
@@ -465,13 +508,17 @@ function handleChunkingSubmit(event) {
     accuracy * 100
   ).toFixed(0)}% accuracy (${correctCount}/${digitsRequired}).`;
   chunkingUI.form.hidden = true;
-  chunkingUI.display.textContent = `Target: ${
+  chunkingUI.displayText.textContent = `Target: ${
     chunkingState.withDelimiters
       ? formatWithDelimiters(target)
       : target
   }`;
 
+  stopChunkingTimer();
+
   chunkingState.roundIndex += 1;
+  chunkingState.phaseRoundCount += 1;
+  chunkingState.errorsInPhase += errorsThisRound;
   chunkingState.awaitingInput = false;
   lockChunkingInput(true);
 
@@ -480,6 +527,24 @@ function handleChunkingSubmit(event) {
   if (chunkingState.pendingNextRoundId) {
     window.clearTimeout(chunkingState.pendingNextRoundId);
   }
+  const reachedLimit = chunkingState.errorsInPhase >= DIGIT_SPAN_ERROR_LIMIT;
+
+  if (reachedLimit) {
+    if (phaseRecorded === "baseline") {
+      chunkingUI.feedback.textContent =
+        "Baseline threshold hit. Chunked digits will start momentarily.";
+      transitionToChunkedPhase();
+      return;
+    }
+
+    chunkingUI.feedback.textContent = "Chunked phase complete. Preparing summary...";
+    chunkingState.pendingNextRoundId = window.setTimeout(() => {
+      chunkingState.pendingNextRoundId = null;
+      finishChunkingSession();
+    }, 900);
+    return;
+  }
+
   chunkingState.pendingNextRoundId = window.setTimeout(() => {
     chunkingState.pendingNextRoundId = null;
     runChunkingRound();
@@ -488,13 +553,14 @@ function handleChunkingSubmit(event) {
 
 function renderChunkingLanding() {
   taskStage.innerHTML = `
-    <div class="chunking-session" role="group" aria-label="Chunking protocol workspace">
+    <div class="chunking-session" role="group" aria-label="Digit Span workspace">
       <div class="chunking-meta">
         <span id="chunking-phase">Baseline · No Delimiters</span>
         <span id="chunking-progress">Awaiting launch</span>
       </div>
       <div class="chunking-display" id="chunking-display" aria-live="assertive">
-        Launch the session to present the first sequence.
+        <span id="chunking-display-text">Launch the session to present the first sequence.</span>
+        <span class="chunking-timer" id="chunking-timer" aria-hidden="true"></span>
       </div>
       <form id="chunking-response" class="chunking-response" autocomplete="off" hidden>
         <label for="chunking-input">Re-enter the sequence</label>
@@ -514,7 +580,7 @@ function renderChunkingLanding() {
         Each sequence will appear for 3 seconds.
       </p>
       <div class="chunking-summary" id="chunking-summary">
-        <p>Accuracy scores for baseline vs chunking aids will appear here.</p>
+        <p>Accuracy scores for baseline vs chunked recall will appear here.</p>
       </div>
     </div>
   `;
@@ -523,6 +589,8 @@ function renderChunkingLanding() {
     phase: document.getElementById("chunking-phase"),
     progress: document.getElementById("chunking-progress"),
     display: document.getElementById("chunking-display"),
+    displayText: document.getElementById("chunking-display-text"),
+    timer: document.getElementById("chunking-timer"),
     form: document.getElementById("chunking-response"),
     input: document.getElementById("chunking-input"),
     feedback: document.getElementById("chunking-feedback"),
@@ -546,7 +614,7 @@ const populateTaskDetails = (key) => {
   `;
   taskDetailsSection.hidden = false;
 
-  if (key === "chunking") {
+  if (key === DIGIT_SPAN_TASK_KEY) {
     if (!chunkingUI) {
       renderChunkingLanding();
     } else {
@@ -555,6 +623,7 @@ const populateTaskDetails = (key) => {
   } else {
     lockChunkingInput(false);
     exitChunkingFullscreen();
+    stopChunkingTimer();
     chunkingUI = null;
     taskStage.innerHTML = `<p>${task.stagePlaceholder}</p>`;
   }
@@ -566,7 +635,7 @@ const setActiveTask = (key) => {
   }
 
   const previousKey = activeTaskKey;
-  if (previousKey === "chunking" && chunkingState?.inProgress) {
+  if (previousKey === DIGIT_SPAN_TASK_KEY && chunkingState?.inProgress) {
     resetChunkingSession({ aborted: true });
   }
 
@@ -604,7 +673,7 @@ launchButton.addEventListener("click", () => {
     return;
   }
 
-  if (activeTaskKey === "chunking") {
+  if (activeTaskKey === DIGIT_SPAN_TASK_KEY) {
     startChunkingSession();
     return;
   }
@@ -624,7 +693,7 @@ settingsButton.addEventListener("click", () => {
     return;
   }
 
-  if (activeTaskKey === "chunking") {
+  if (activeTaskKey === DIGIT_SPAN_TASK_KEY) {
     window.alert(
       "Chunking protocol settings (duration, delimiter style, scoring weights) are coming soon."
     );
