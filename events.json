@@ -1,6 +1,27 @@
 {
   "events": [
     {
+      "title": "Science",
+      "datetimes": ["2026-02-19T17:00:00"],
+      "location": "Boyd 552",
+      "lead": "Cameron",
+      "desc": "Fundamentals of science and knowledge acquisition."
+    },
+    {
+      "title": "Second Meeting Spring 2026",
+      "datetimes": ["2026-02-12T17:00:00"],
+      "location": "Boyd 552",
+      "lead": "Cameron",
+      "desc": "First meeting follow-up."
+    },
+    {
+      "title": "First Meeting Spring 2026",
+      "datetimes": ["2026-02-04T17:30:00"],
+      "location": "Boyd 552",
+      "lead": "Cameron",
+      "desc": "Overview of club and engagement fair follow-up."
+    },
+    {
       "title": "Group Problem Solving",
       "datetimes": ["2025-10-22T17:30:00", "2025-10-29T17:30:00"],
       "location": "Boyd 552",
