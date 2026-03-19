@@ -1,6 +1,13 @@
 {
   "events": [
     {
+      "title": "Mapping out Cognitive Science",
+      "datetimes": ["2026-03-19T17:00:00"],
+      "location": "Boyd 552",
+      "lead": "Cameron",
+      "desc": "Mapping out the landscape of cognitive science."
+    },
+    {
       "title": "Science",
       "datetimes": ["2026-02-19T17:00:00"],
       "location": "Boyd 552",
